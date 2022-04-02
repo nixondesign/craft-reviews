@@ -1,0 +1,73 @@
+{% extends "reviews/settings/_layout.twig" %}
+
+{% import "_includes/forms" as forms %}
+
+{% set title = 'Review Types' %}
+{% set selectedSidebarItem = 'general' %}
+{% set fullPageForm = true %}
+
+{% block content %}
+    {{ actionInput('reviews/settings/save-settings') }}
+
+    <h2 class="first">Interface</h2>
+
+    {{ forms.checkboxField({
+        label: 'Show pending review count badge'|t('reviews'),
+        instructions: 'Show the pending review badge in the sidebar.'|t('reviews'),
+        name: 'settings[showSidebarBadge]',
+        value: 1,
+        checked: settings.showSidebarBadge,
+        errors: settings.getErrors('showSidebarBadge'),
+    }) }}
+
+	{{ forms.checkboxField({
+		label: 'Show ratings in element sources'|t('reviews'),
+		instructions: 'Show individual ratings in the element sources sidebar.'|t('reviews'),
+		name: 'settings[showRatingElementSources]',
+		value: 1,
+		checked: settings.showRatingElementSources,
+		errors: settings.getErrors('showRatingElementSources'),
+	}) }}
+
+    <hr>
+
+    <h2>Spam Protection</h2>
+
+    {{ forms.checkboxField({
+        label: 'Enable spam protection'|t('reviews'),
+        name: 'settings[enableSpamProtection]',
+        value: 1,
+        checked: settings.enableSpamProtection,
+        errors: settings.getErrors('enableSpamProtection'),
+        toggle: '#spam-settings',
+    }) }}
+
+    <div id="spam-settings" class="{{ not settings.enableSpamProtection ? 'hidden' }}">
+        {{ forms.textField({
+            label: 'Minimum Submit Time'|t('reviews'),
+            instructions: 'The duration in seconds since page load that must pass before a submitted review is considered valid.'|t('reviews'),
+            size: 2,
+            name: 'settings[minimumSubmitTime]',
+            value: settings.minimumSubmitTime,
+            errors: settings.getErrors('minimumSubmitTime'),
+        }) }}
+
+        {{ forms.textField({
+            label: 'Honeypot Field Name'|t('reviews'),
+            instructions: 'The `name` of the hidden honeypot field.'|t(''),
+            class: 'code',
+            name: 'settings[honeypotFieldName]',
+            value: settings.honeypotFieldName,
+            errors: settings.getErrors('honeypotFieldName'),
+        }) }}
+
+        {{ forms.textField({
+            label: 'Submission Time Field Name'|t('reviews'),
+            instructions: 'The `name` of the hidden submission time field.'|t('reviews'),
+            class: 'code',
+            name: 'settings[submissionTimeFieldName]',
+            value: settings.submissionTimeFieldName,
+            errors: settings.getErrors('submissionTimeFieldName'),
+        }) }}
+    </div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{
+	"name": "rynpsc/craft-reviews",
+	"description": "Allow users to leave reviews on Entries, Products and more.",
+	"type": "craft-plugin",
+	"license": "proprietary",
+	"keywords": [
+		"cms",
+		"craftcms",
+		"yii2"
+	],
+	"support": {
+		"docs": "https://github.com/rynpsc/craft-reviews/blob/main/README.md",
+		"issues": "https://github.com/rynpsc/craft-reviews/issues",
+		"source": "https://github.com/rynpsc/craft-reviews"
+	},
+	"config": {
+		"platform": {
+			"php": "8.0.2"
+		}
+	},
+	"require": {
+		"craftcms/cms": "^3.7.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"rynpsc\\reviews\\": "src/"
+		}
+	},
+	"extra": {
+		"name": "Reviews",
+		"handle": "reviews"
+	}
+}

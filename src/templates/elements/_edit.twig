@@ -1,0 +1,111 @@
+{% extends "_layouts/element" %}
+
+{% import "_includes/forms" as forms %}
+
+{% set element = review %}
+{% set redirectUrl = 'reviews/reviews' %}
+{% set canUpdateSource = true %}
+{% set canDeleteSource = review.isDeletable %}
+{% set saveSourceAction = 'reviews/reviews/save-review' %}
+{% set deleteSourceAction = 'reviews/reviews/delete-review' %}
+
+{% set crumbs = [
+    { label: 'Reviews' | t('reviews'), url: url('reviews') },
+] %}
+
+{% block content %}
+    {{ hiddenInput('elementId', review.elementId) }}
+    {{ hiddenInput('email', review.email) }}
+    {{ hiddenInput('fullName', review.fullName) }}
+    {{ hiddenInput('reviewId', review.id) }}
+    {{ hiddenInput('siteId', review.siteId) }}
+    {{ hiddenInput('typeId', review.typeId) }}
+    {{ hiddenInput('userId', review.userId) }}
+	{{ hiddenInput('moderationStatus', review.moderationStatus) }}
+    {{ redirectInput('reviews') }}
+
+    {{ parent() }}
+{% endblock %}
+
+{% block details %}
+    <div id="settings" class="meta">
+		{{ forms.selectizeField({
+			label: 'Status'|t('reviews'),
+			id: 'moderationStatus',
+			name: 'moderationStatus',
+			options: review.moderationStatuses,
+			value: review.moderationStatus,
+			errors: review.getErrors('moderationStatus'),
+		}) }}
+
+        {{ forms.dateTimeField({
+            label: 'Date'|t('reviews'),
+            name: 'submissionDate',
+            value: review.submissionDate,
+            errors: review.getErrors('submissionDate'),
+        }) }}
+
+		{{ forms.lightswitchField({
+			label: 'Enabled'|t('reviews'),
+			name: 'enabled',
+			on: review.enabled,
+			value: 1,
+			errors: review.getErrors('enabled'),
+		}) }}
+    </div>
+
+    <div class="meta read-only">
+		{% set status = review.statuses[review.status] ?? null %}
+
+		<div class="data">
+			<h5 class="heading">Status</h5>
+			<div class="value">
+				<span class="status {{ status.color ?? null }}"></span>
+				{{ status.label ?? null }}
+			</div>
+		</div>
+
+        {% set user = review.getUser() %}
+
+        {% if user %}
+            <div class="data">
+                <h5 class="heading">User</h5>
+                <div class="value">
+					<a href="{{ review.user.cpEditUrl }}">{{ review.user.friendlyName }}</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="data">
+                <h5 class="heading">Name</h5>
+                <div class="value">{{ review.fullName }}</div>
+            </div>
+
+            <div class="data" style="align-items: flex-start">
+                <h5 class="heading">Email</h5>
+                <div class="value" style="word-break: break-all">{{ review.email }}</div>
+            </div>
+        {% endif %}
+
+        <div class="data">
+            <h5 class="heading">{{ review.getElementDisplayName() ?: 'Element'|t('reviews') }}</h5>
+
+            <div class="value">
+                {% if not review.element %}
+                    <span>{{ 'Deleted'|t('reviews') }}</span>
+                {% else %}
+					<a href="{{ review.element.cpEditUrl }}">{{ review.element.title }}</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="data">
+            <h5 class="heading">{{ "Created at"|t('reviews') }}</h5>
+            <div class="value">{{ review.dateCreated|datetime('short') }}</div>
+        </div>
+
+        <div class="data">
+            <h5 class="heading">{{ "Updated at"|t('reviews') }}</h5>
+            <div class="value">{{ review.dateUpdated|datetime('short') }}</div>
+        </div>
+    </div>
+{% endblock %}

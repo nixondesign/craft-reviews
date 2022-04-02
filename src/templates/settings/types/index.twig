@@ -1,0 +1,66 @@
+{% extends "reviews/settings/_layout.twig" %}
+
+{% set title = "Review Types"|t('reviews') %}
+
+{% do view.registerAssetBundle('craft\\web\\assets\\admintable\\AdminTableAsset') -%}
+
+{% do view.registerTranslations('reviews', [
+    "Name",
+    "Handle",
+    "No review types exist yet.",
+]) %}
+
+{% block actionButton %}
+    <a href="{{ url('reviews/settings/types/new') }}" class="btn submit add icon">{{ "New review type"|t('reviews') }}</a>
+{% endblock %}
+
+{% set crumbs = [
+    { label: "Settings"|t('app'), url: url('reviews/settings') }
+] %}
+
+{% block content %}
+    <div id="reviewtypes-vue-admin-table"></div>
+{% endblock %}
+
+{% set tableData = [] %}
+
+{% for type in reviewTypes %}
+    {% set tableData = tableData|merge([{
+        id: type.id,
+        title: type.name|t('site'),
+        url: url('reviews/settings/types/' ~ type.id),
+        name: type.name|t('reviews')|e,
+        handle: type.handle,
+		allowGuestReviews: type.allowGuestReviews,
+    }]) %}
+{% endfor %}
+
+{% js %}
+    var columns = [
+        {
+            name: '__slot:title',
+            title: Craft.t('reviews', 'Name'),
+        },
+        {
+            name: '__slot:handle',
+            title: Craft.t('reviews', 'Handle'),
+        },
+		{
+			name: 'allowGuestReviews',
+			title: Craft.t('reviews', 'Allow Guest Reviews'),
+			callback: function(value) {
+				if (value) {
+					return '<div data-icon="check" title="'+Craft.escapeHtml(Craft.t('reviews','Yes'))+'"></div>';
+				}
+			}
+		},
+    ];
+
+    new Craft.VueAdminTable({
+        columns: columns,
+        container: '#reviewtypes-vue-admin-table',
+        deleteAction: 'reviews//review-types/delete-review-type',
+        emptyMessage: Craft.t('app', 'No review types exist yet.'),
+        tableData: {{ tableData|json_encode|raw }}
+    });
+{% endjs %}

@@ -1,0 +1,16 @@
+{% set status = review.status %}
+{% set statusDef = review.statuses()[status] ?? null %}
+{% set statusColor = statusDef.color ?? status %}
+{% set statusLabel = statusDef.label ?? statusDef ?? status|ucfirst %}
+
+<div class="rynpsc-reviews-element">
+    <div class="rynpsc-reviews-element-status">
+        <span class="status {{ statusColor }}"></span>
+    </div>
+
+    <a href="{{ review.cpEditUrl }}">{{ review.fullName }}</a>
+
+    <div class="rynpsc-reviews-element-review">
+        <p>{{ review.review }}</p>
+    </div>
+</div>

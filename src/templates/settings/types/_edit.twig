@@ -1,0 +1,102 @@
+{% extends "_layouts/cp" %}
+
+{% set fullPageForm = true %}
+{% set selectedSubnavItem = 'settings' %}
+
+{% set crumbs = [
+    { label: 'Reviews' | t('reviews'), url: url('reviews') },
+    { label: 'Review types' | t('reviews'), url: url('reviews/settings/types') },
+] %}
+
+{% import "_includes/forms" as forms %}
+
+{% block content %}
+    {{ actionInput('reviews/review-types/save-type') }}
+    {{ hiddenInput('id', reviewType.id) }}
+    {{ redirectInput('reviews/settings/types') }}
+
+    {{ forms.textField({
+        first: true,
+        label: 'Name'|t('reviews'),
+        instructions: 'What this review type will be called in the control panel.'|t('reviews'),
+        id: 'name',
+        name: 'name',
+        value: reviewType.name,
+        errors: reviewType.getErrors('name'),
+        autofocus: true,
+        required: true,
+    }) }}
+
+    {{ forms.textField({
+        label: 'Handle'|t('reviews'),
+        instructions: 'How you’ll refer to this review type in your code.'|t('reviews'),
+        id: 'handle',
+        name: 'handle',
+        class: 'code',
+        autocorrect: false,
+        autocapitalize: false,
+        value: reviewType.handle,
+        errors: reviewType.getErrors('handle'),
+        required: true,
+    }) }}
+
+	{{ forms.textField({
+		label: 'Maximum Rating'|t('reviews'),
+		instructions: 'The maximum rating a review can have.'|t('reviews'),
+		name: 'maxRating',
+		size: 2,
+		inputmode: 'numeric',
+		value: reviewType.maxRating,
+		errors: reviewType.getErrors('maxRating'),
+		warning: 'Warning changing the maximum rating does not modify ratings for existing reviews.',
+	}) }}
+
+    {{ forms.selectField({
+        label: 'Default Status',
+        instructions: 'Default status to assign to reviews.'|t('reviews'),
+        name: 'defaultStatus',
+        options: statuses,
+        value: reviewType.defaultStatus,
+        errors: reviewType.getErrors('defaultStatus'),
+    }) }}
+
+    {{ forms.checkboxField({
+        label: 'Allow guest reviews',
+        instructions: 'Allow non-logged in users to submit reviews.'|t('reviews'),
+        name: 'allowGuestReviews',
+        value: 1,
+        checked: reviewType.allowGuestReviews,
+        errors: reviewType.getErrors('allowGuestReviews'),
+        toggle: 'guest-review-settings',
+    }) }}
+
+    <div id="guest-review-settings" class="indent {{ reviewType.allowGuestReviews ? 'hidden' }}">
+        {{ forms.checkboxField({
+            label: 'Require guest name',
+            instructions: 'Require a name for guest reviews.'|t('reviews'),
+            name: 'requireGuestName',
+            value: 1,
+            checked: reviewType.requireGuestName,
+            errors: reviewType.getErrors('requireGuestName'),
+        }) }}
+
+        {{ forms.checkboxField({
+            label: 'Require guest email address',
+            instructions: 'Require an email address for guest reviews.'|t('reviews'),
+            name: 'requireGuestEmail',
+            value: 1,
+            checked: reviewType.requireGuestEmail,
+            errors: reviewType.getErrors('requireGuestEmail'),
+        }) }}
+    </div>
+
+    <hr>
+
+    {{ forms.fieldLayoutDesignerField({
+        fieldLayout: reviewType.getFieldLayout(),
+    }) }}
+{% endblock %}
+
+{% if not reviewType.handle %}
+    {% js "new Craft.HandleGenerator('#name', '#handle');" %}
+{% endif %}

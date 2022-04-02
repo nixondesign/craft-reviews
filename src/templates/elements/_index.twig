@@ -1,0 +1,6 @@
+{% extends "_layouts/elementindex" %}
+
+{% set title = "Reviews"|t('app') %}
+{% set elementType = 'rynpsc\\reviews\\elements\\Review' %}
+
+{% do view.registerAssetBundle('rynpsc\\reviews\\web\\assets\\ReviewsAsset') %}
