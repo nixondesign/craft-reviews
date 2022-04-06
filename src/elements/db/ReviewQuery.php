@@ -26,6 +26,19 @@ class ReviewQuery extends ElementQuery
     /**
      * @inheritdoc
      */
+    public function __construct($elementType, array $config = [])
+    {
+        // Default status
+        if (!isset($config['status'])) {
+            $config['status'] = 'live';
+        }
+
+        parent::__construct($elementType, $config);
+    }
+
+    /**
+     * @inheritdoc
+     */
     protected $defaultOrderBy = [
         'reviews_reviews.submissionDate' => SORT_DESC,
     ];
