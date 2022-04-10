@@ -18,6 +18,9 @@ class Settings extends Model
 
     public ?string $submissionTimeFieldName = 'submission_time';
 
+    /**
+     * @inheritdoc
+     */
     protected function defineRules(): array
     {
         $rules = [];

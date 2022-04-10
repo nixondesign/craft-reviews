@@ -8,6 +8,9 @@ use craft\db\ActiveRecord;
 
 class ReviewType extends ActiveRecord
 {
+    /**
+     * @inheritdoc
+     */
     public static function tableName()
     {
         return Table::REVIEWTYPES;

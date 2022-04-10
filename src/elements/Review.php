@@ -45,51 +45,81 @@ class Review extends Element
     private $_user;
     private $_guest;
 
+    /**
+     * @inheritdoc
+     */
     public static function displayName(): string
     {
         return Craft::t('reviews', 'Review');
     }
 
+    /**
+     * @inheritdoc
+     */
     public static function lowerDisplayName(): string
     {
         return Craft::t('reviews', 'review');
     }
 
+    /**
+     * @inheritdoc
+     */
     public static function pluralDisplayName(): string
     {
         return Craft::t('reviews', 'Reviews');
     }
 
+    /**
+     * @inheritdoc
+     */
     public static function pluralLowerDisplayName(): string
     {
         return Craft::t('reviews', 'reviews');
     }
 
+    /**
+     * @inheritdoc
+     */
     public static function refHandle(): string
     {
         return 'review';
     }
 
+    /**
+     * @inheritdoc
+     */
     public static function hasTitles(): bool
     {
         return false;
     }
 
+    /**
+     * @inheritdoc
+     */
     public static function hasStatuses(): bool
     {
         return true;
     }
 
+    /**
+     * @inheritdoc
+     */
     public static function hasContent(): bool
     {
         return true;
     }
 
+    /**
+     * @inheritdoc
+     */
     public static function isLocalized(): bool
     {
         return true;
     }
 
+    /**
+     * @inheritdoc
+     */
     public static function statuses(): array
     {
         return [
@@ -116,11 +146,17 @@ class Review extends Element
         ];
     }
 
+    /**
+     * @inheritdoc
+     */
     public static function find(): ElementQueryInterface
     {
         return new ReviewQuery(static::class);
     }
 
+    /**
+     * @inheritdoc
+     */
     protected static function defineSources(string $context = null): array
     {
         $sources = [
@@ -168,6 +204,9 @@ class Review extends Element
         return $sources;
     }
 
+    /**
+     * @inheritdoc
+     */
     protected static function defineTableAttributes(): array
     {
         return [
@@ -181,6 +220,9 @@ class Review extends Element
         ];
     }
 
+    /**
+     * @inheritdoc
+     */
     protected static function defineDefaultTableAttributes(string $source): array
     {
         return [
@@ -191,6 +233,9 @@ class Review extends Element
         ];
     }
 
+    /**
+     * @inheritdoc
+     */
     protected static function defineActions(string $source = null): array
     {
         $actions = [];
@@ -251,6 +296,9 @@ class Review extends Element
             ->scalar();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function init(): void
     {
         $this->typeId = (int)$this->typeId;
@@ -261,6 +309,9 @@ class Review extends Element
         parent::init();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function datetimeAttributes(): array
     {
         $attributes = parent::datetimeAttributes();
@@ -269,6 +320,9 @@ class Review extends Element
         return $attributes;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getCpEditUrl(): string
     {
         $url = UrlHelper::cpUrl('reviews/' . $this->id);
@@ -280,12 +334,18 @@ class Review extends Element
         return $url;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getSupportedSites(): array
     {
 
         return [$this->siteId ?: Craft::$app->getSites()->getPrimarySite()->id];
     }
 
+    /**
+     * @inheritdoc
+     */
     public function beforeValidate(): bool
     {
         if ($this->scenario === self::SCENARIO_LIVE && !$this->submissionDate) {
@@ -297,6 +357,9 @@ class Review extends Element
         return parent::beforeValidate();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function afterSave(bool $isNew): void
     {
         if (!$isNew) {
@@ -343,6 +406,9 @@ class Review extends Element
         parent::afterSave($isNew);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getStatus(): string
     {
         $status = parent::getStatus();
@@ -373,11 +439,17 @@ class Review extends Element
         return $status;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getFieldLayout()
     {
         return $this->getType()->getFieldLayout();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getIsEditable(): bool
     {
         $type = $this->getType();
@@ -390,6 +462,9 @@ class Review extends Element
         return true;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getIsDeletable(): bool
     {
         $type = $this->getType();
@@ -538,6 +613,9 @@ class Review extends Element
         ]));
     }
 
+    /**
+     * @inheritdoc
+     */
     protected function defineRules(): array
     {
         $rules = parent::defineRules();
@@ -561,6 +639,9 @@ class Review extends Element
         return $rules;
     }
 
+    /**
+     * @inheritdoc
+     */
     protected function tableAttributeHtml(string $attribute): string
     {
         switch ($attribute) {
