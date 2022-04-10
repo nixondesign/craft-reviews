@@ -170,7 +170,6 @@ class Review extends Element
 
         $sources[] = ['heading' => Craft::t('reviews', 'Status')];
 
-
         foreach (self::moderationStatuses() as $key => $status) {
             $sources[] = [
                 'key' => $key,
