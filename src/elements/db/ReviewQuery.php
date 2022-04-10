@@ -3,9 +3,12 @@
 namespace rynpsc\reviews\elements\db;
 
 use rynpsc\reviews\Plugin;
+use rynpsc\reviews\db\Table;
 use rynpsc\reviews\elements\Review;
+use rynpsc\reviews\models\ReviewType;
 use rynpsc\reviews\models\Summary;
 
+use craft\db\Query;
 use craft\elements\db\ElementQuery;
 use craft\helpers\Db;
 use craft\helpers\StringHelper;
@@ -19,6 +22,7 @@ class ReviewQuery extends ElementQuery
     public $fullName;
     public $rating;
     public $review;
+    public $type;
     public $typeId;
     public $moderationStatus;
     public $userId;
@@ -64,6 +68,23 @@ class ReviewQuery extends ElementQuery
     public function email($value): self
     {
         $this->email = $value;
+        return $this;
+    }
+
+    public function type($value): self
+    {
+        if ($value instanceof ReviewType) {
+            $this->typeId = $value->id;
+        } elseif ($value !== null) {
+            $this->typeId = (new Query())
+                ->select(['id'])
+                ->from([Table::REVIEWTYPES])
+                ->where(Db::parseParam('handle', $value))
+                ->scalar();
+        } else {
+            $this->typeId = null;
+        }
+
         return $this;
     }
 
