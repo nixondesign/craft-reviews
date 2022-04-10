@@ -108,8 +108,8 @@ class Install extends Migration
         $fieldLayoutId = $this->db->getLastInsertID(FieldLayout::tableName());
 
         $data = [
-            'name' => 'Standard',
-            'handle' => 'standard',
+            'name' => 'Default',
+            'handle' => 'default',
             'fieldLayoutId' => $fieldLayoutId,
         ];
 
