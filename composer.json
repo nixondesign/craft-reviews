@@ -1,6 +1,6 @@
 {
 	"name": "rynpsc/craft-reviews",
-	"description": "Allow users to leave reviews on Entries, Products and more.",
+	"description": "Allow users to leave reviews on Products, Entries and other element types.",
 	"type": "craft-plugin",
 	"license": "proprietary",
 	"keywords": [
