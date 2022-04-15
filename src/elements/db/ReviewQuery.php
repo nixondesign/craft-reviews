@@ -16,6 +16,8 @@ use yii\base\InvalidConfigException;
 
 class ReviewQuery extends ElementQuery
 {
+    public $after;
+    public $before;
     public $element;
     public $elementId;
     public $email;
@@ -47,6 +49,18 @@ class ReviewQuery extends ElementQuery
     protected $defaultOrderBy = [
         'reviews_reviews.submissionDate' => SORT_DESC,
     ];
+
+    public function after($value): self
+    {
+        $this->after = $value;
+        return $this;
+    }
+
+    public function before($value): self
+    {
+        $this->before = $value;
+        return $this;
+    }
 
     public function element($value): self
     {
@@ -202,6 +216,14 @@ class ReviewQuery extends ElementQuery
 
         if ($this->submissionDate) {
             $this->subQuery->andWhere(Db::parseDateParam('reviews_reviews.submissionDate', $this->submissionDate));
+        } else {
+            if ($this->after) {
+                $this->subQuery->andWhere(Db::parseDateParam('reviews_reviews.submissionDate', $this->after, '>='));
+            }
+
+            if ($this->before) {
+                $this->subQuery->andWhere(Db::parseDateParam('reviews_reviews.submissionDate', $this->before, '<'));
+            }
         }
 
         if ($this->rating) {
