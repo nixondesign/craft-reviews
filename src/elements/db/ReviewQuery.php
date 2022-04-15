@@ -15,16 +15,16 @@ use craft\helpers\StringHelper;
 
 class ReviewQuery extends ElementQuery
 {
-    public $submissionDate;
     public $element;
     public $elementId;
     public $email;
     public $fullName;
+    public $moderationStatus;
     public $rating;
     public $review;
+    public $submissionDate;
     public $type;
     public $typeId;
-    public $moderationStatus;
     public $userId;
 
     /**
@@ -47,9 +47,33 @@ class ReviewQuery extends ElementQuery
         'reviews_reviews.submissionDate' => SORT_DESC,
     ];
 
+    public function element($value): self
+    {
+        $this->elementId = $value->id;
+        return $this;
+    }
+
+    public function elementId($value): self
+    {
+        $this->elementId = $value;
+        return $this;
+    }
+
+    public function email($value): self
+    {
+        $this->email = $value;
+        return $this;
+    }
+
     public function fullName($value): self
     {
         $this->fullName = $value;
+        return $this;
+    }
+
+    public function moderationStatus($value): self
+    {
+        $this->moderationStatus = $value;
         return $this;
     }
 
@@ -62,12 +86,6 @@ class ReviewQuery extends ElementQuery
     public function submissionDate($value): self
     {
         $this->submissionDate = $value;
-        return $this;
-    }
-
-    public function email($value): self
-    {
-        $this->email = $value;
         return $this;
     }
 
@@ -97,24 +115,6 @@ class ReviewQuery extends ElementQuery
     public function userId($value): self
     {
         $this->userId = $value;
-        return $this;
-    }
-
-    public function element($value): self
-    {
-        $this->elementId = $value->id;
-        return $this;
-    }
-
-    public function elementId($value): self
-    {
-        $this->elementId = $value;
-        return $this;
-    }
-
-    public function moderationStatus($value): self
-    {
-        $this->moderationStatus = $value;
         return $this;
     }
 
