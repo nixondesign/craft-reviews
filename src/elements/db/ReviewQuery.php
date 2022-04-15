@@ -12,6 +12,7 @@ use craft\db\Query;
 use craft\elements\db\ElementQuery;
 use craft\helpers\Db;
 use craft\helpers\StringHelper;
+use yii\base\InvalidConfigException;
 
 class ReviewQuery extends ElementQuery
 {
@@ -118,12 +119,15 @@ class ReviewQuery extends ElementQuery
         return $this;
     }
 
-    public function summary($db = null)
+    /**
+     * @throws InvalidConfigException
+     */
+    public function summary($db = null): ?Summary
     {
         $typesService = Plugin::getInstance()->getReviewTypes();
 
         if ($this->typeId === null) {
-            return null;
+            throw new InvalidConfigException("Query is missing a valid 'type' or 'typeId' parameter.");
         }
 
         $type = $typesService->getReviewTypeById($this->typeId);
