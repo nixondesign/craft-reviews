@@ -250,26 +250,21 @@ class ReviewQuery extends ElementQuery
      */
     protected function statusCondition(string $status): mixed
     {
-        switch ($status) {
-            case Review::STATUS_LIVE:
-                return [
-                    'elements.enabled' => true,
-                    'reviews_reviews.moderationStatus' => Review::STATUS_APPROVED,
-                ];
-            case Review::STATUS_APPROVED:
-                return [
-                    'reviews_reviews.moderationStatus' => Review::STATUS_APPROVED,
-                ];
-            case Review::STATUS_PENDING:
-                return [
-                    'reviews_reviews.moderationStatus' => Review::STATUS_PENDING,
-                ];
-            case Review::STATUS_REJECTED:
-                return [
-                    'reviews_reviews.moderationStatus' => Review::STATUS_REJECTED,
-                ];
-            default:
-                return parent::statusCondition($status);
-        }
+        return match ($status) {
+            Review::STATUS_LIVE => [
+                'elements.enabled' => true,
+                'reviews_reviews.moderationStatus' => Review::STATUS_APPROVED,
+            ],
+            Review::STATUS_APPROVED => [
+                'reviews_reviews.moderationStatus' => Review::STATUS_APPROVED,
+            ],
+            Review::STATUS_PENDING => [
+                'reviews_reviews.moderationStatus' => Review::STATUS_PENDING,
+            ],
+            Review::STATUS_REJECTED => [
+                'reviews_reviews.moderationStatus' => Review::STATUS_REJECTED,
+            ],
+            default => parent::statusCondition($status),
+        };
     }
 }
