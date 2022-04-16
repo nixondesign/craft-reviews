@@ -248,7 +248,7 @@ class ReviewQuery extends ElementQuery
     /**
      * @inheritdoc
      */
-    protected function statusCondition(string $status)
+    protected function statusCondition(string $status): mixed
     {
         switch ($status) {
             case Review::STATUS_LIVE:
