@@ -387,10 +387,9 @@ class Review extends Element
             }
         }
 
-        $this->siteId = Craft::$app
-            ->getElements()
-            ->getElementById($this->elementId)
-            ->siteId;
+        if ($this->siteId === null) {
+            $this->siteId = Craft::$app->getSites()->getCurrentSite()->id;
+        }
 
         $record->elementId = $this->elementId;
         $record->moderationStatus = $this->moderationStatus;

@@ -146,6 +146,7 @@ class ReviewsController extends Controller
 
         $review->typeId = $typeId;
         $review->elementId = $elementId;
+        $review->siteId = $this->request->getBodyParam('siteId');
         $review->rating = $this->request->getBodyParam('rating');
         $review->review = $this->request->getBodyParam('review');
         $review->moderationStatus = $this->request->getParam('moderationStatus', $review->moderationStatus);
