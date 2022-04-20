@@ -62,6 +62,23 @@ class ReviewTypes extends Component
         return count($this->getEditableReviewTypes());
     }
 
+    public function getReviewTypeByHandle(string $handle): ?ReviewType
+    {
+        $query = (new Query())
+            ->from(Table::REVIEWTYPES)
+            ->where(['handle' => $handle])
+            ->one();
+
+        if ($query === null) {
+            return null;
+        }
+
+        $model = new ReviewType();
+        $model->setAttributes($query);
+
+        return $model;
+    }
+
     public function getReviewTypeById(int $id): ?ReviewType
     {
         $record = ReviewTypeRecord::findOne(['id' => $id]);
