@@ -8,6 +8,7 @@ use rynpsc\reviews\elements\db\ReviewQuery;
 
 use Craft;
 use DateTime;
+use craft\helpers\ArrayHelper;
 use craft\helpers\Html;
 use craft\helpers\Template;
 use Twig\Markup;
@@ -26,7 +27,7 @@ class Variable extends Behavior
         return $query;
     }
 
-    public function protect(): Markup
+    public function protect(array $attributes = []): Markup
     {
         $settings = Plugin::getInstance()->getSettings();
 
@@ -34,9 +35,15 @@ class Variable extends Behavior
         $timestamp = (new DateTime())->modify("+ {$seconds} seconds")->getTimestamp();
         $timestamp = Craft::$app->getSecurity()->hashData($timestamp);
 
+        if (!ArrayHelper::keyExists('autocomplete', $attributes)) {
+            $attributes['autocomplete'] = 'off';
+        }
+
+        $type = ArrayHelper::getValue($attributes, 'type', 'hidden');
+
         $output = [
-            Html::input('text', $settings->honeypotFieldName, null, ['autocomplete' => 'off']),
-            Html::input('text', $settings->submissionTimeFieldName, $timestamp, ['autocomplete' => 'off']),
+            Html::input($type, $settings->honeypotFieldName, null, $attributes),
+            Html::input($type, $settings->submissionTimeFieldName, $timestamp, $attributes),
         ];
 
         return Template::raw(implode('', $output));
