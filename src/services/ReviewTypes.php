@@ -26,22 +26,20 @@ class ReviewTypes extends Component
     public function getAllReviewTypes(): array
     {
         $results = (new Query())
-            ->select([
-                'id',
-                'name',
-                'handle',
-                'uid',
-            ])
+            ->select('*')
             ->from(Table::REVIEWTYPES)
             ->all();
 
-        $all = [];
+        $types = [];
 
         foreach ($results as $result) {
-            $all[] = new ReviewType($result);
+            $model = new ReviewType();
+            $model->setAttributes($result, false);
+
+            $types[] = $model;
         }
 
-        return $all;
+        return $types;
     }
 
     public function getEditableReviewTypes(): array

@@ -6,6 +6,7 @@ use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
 
 use Craft;
+use DateTime;
 use craft\base\Model;
 use craft\behaviors\FieldLayoutBehavior;
 use craft\validators\HandleValidator;
@@ -32,6 +33,10 @@ class ReviewType extends Model
     public ?string $uid = null;
 
     public int $maxRating = 5;
+
+    public $dateCreated = null;
+
+    public $dateUpdated = null;
 
     /**
      * @inheritdoc
