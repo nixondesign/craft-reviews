@@ -62,9 +62,9 @@ class ReviewType extends Model
     /**
      * @inheritdoc
      */
-    public function rules(): array
+    public function defineRules(): array
     {
-        $rules = parent::rules();
+        $rules = parent::defineRules();
 
         $rules[] = [['id', 'fieldLayoutId', 'maxRating'], 'number', 'integerOnly' => true];
 
