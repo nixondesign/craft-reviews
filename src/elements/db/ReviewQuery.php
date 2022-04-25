@@ -8,6 +8,7 @@ use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\models\ReviewType;
 use rynpsc\reviews\models\Summary;
 
+use DateTime;
 use craft\db\Query;
 use craft\elements\db\ElementQuery;
 use craft\helpers\Db;
