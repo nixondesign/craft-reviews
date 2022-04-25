@@ -79,14 +79,17 @@ class ReviewTypes extends Component
 
     public function getReviewTypeById(int $id): ?ReviewType
     {
-        $record = ReviewTypeRecord::findOne(['id' => $id]);
+        $result = (new Query())
+            ->from(Table::REVIEWTYPES)
+            ->where(['id' => $id])
+            ->one();
 
-        if ($record === null) {
+        if ($result === null) {
             return null;
         }
 
         $model = new ReviewType();
-        $model->setAttributes($record->getAttributes(), false);
+        $model->setAttributes($result, false);
 
         return $model;
     }
