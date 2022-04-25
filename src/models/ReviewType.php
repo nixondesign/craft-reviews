@@ -38,6 +38,16 @@ class ReviewType extends Model
     public $dateUpdated = null;
 
     /**
+     * Use the translated review type's name as the string representation.
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return Craft::t('reviews', $this->name) ?: static::class;
+    }
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels(): array
