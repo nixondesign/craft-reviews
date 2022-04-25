@@ -23,7 +23,7 @@ class Settings extends Model
      */
     protected function defineRules(): array
     {
-        $rules = [];
+        $rules = parent::defineRules();
 
         $rules[] = ['minimumSubmitTime', 'number', 'integerOnly' => true];
         $rules[] = ['honeypotFieldName', 'default', 'value' => 'user_name'];

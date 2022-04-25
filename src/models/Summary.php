@@ -26,12 +26,15 @@ class Summary extends Model
         return ArrayHelper::getValue($this->ratingCounts, $rating - 1);
     }
 
+    /**
+     * @inerhitdoc
+     */
     protected function defineRules(): array
     {
-        $rules = [
-            [['average'], 'number', 'integerOnly' => true],
-            [['count', 'lowest', 'highest' ], 'number', 'integerOnly' => true],
-        ];
+        $rules = parent::defineRules();
+
+        $rules[] = [['average'], 'number', 'integerOnly' => true];
+        $rules[] = [['count', 'lowest', 'highest' ], 'number', 'integerOnly' => true];
 
         return $rules;
     }
