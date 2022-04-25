@@ -6,7 +6,6 @@ use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
 
 use Craft;
-use DateTime;
 use craft\base\Model;
 use craft\behaviors\FieldLayoutBehavior;
 use craft\validators\HandleValidator;
