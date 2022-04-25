@@ -250,10 +250,13 @@ class ReviewQuery extends ElementQuery
      */
     protected function statusCondition(string $status): mixed
     {
+        $currentTimeDb = Db::prepareDateForDb(new DateTime());
+        
         return match ($status) {
             Review::STATUS_LIVE => [
                 'elements.enabled' => true,
                 'reviews_reviews.moderationStatus' => Review::STATUS_APPROVED,
+                'reviews_reviews.submissionDate' => ['<=', $currentTimeDb],
             ],
             Review::STATUS_APPROVED => [
                 'reviews_reviews.moderationStatus' => Review::STATUS_APPROVED,
