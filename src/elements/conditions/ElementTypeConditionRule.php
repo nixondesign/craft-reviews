@@ -4,7 +4,6 @@ namespace rynpsc\reviews\elements\conditions;
 
 use Craft;
 use craft\base\BlockElementInterface;
-
 use craft\base\conditions\BaseMultiSelectConditionRule;
 use craft\base\ElementInterface;
 use craft\elements\conditions\ElementConditionRuleInterface;

@@ -4,7 +4,6 @@ namespace rynpsc\reviews\controllers;
 
 use Craft;
 use craft\helpers\DateTimeHelper;
-
 use craft\web\Controller;
 use DateTime;
 use rynpsc\reviews\elements\Review;

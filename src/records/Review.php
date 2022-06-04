@@ -3,7 +3,6 @@
 namespace rynpsc\reviews\records;
 
 use craft\db\ActiveRecord;
-
 use craft\elements\User;
 use rynpsc\reviews\db\Table;
 use yii\db\ActiveQueryInterface;

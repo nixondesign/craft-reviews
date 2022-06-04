@@ -3,7 +3,6 @@
 namespace rynpsc\reviews\controllers;
 
 use Craft;
-
 use craft\web\Controller;
 use rynpsc\reviews\Plugin;
 use yii\web\BadRequestHttpException;

@@ -5,7 +5,6 @@ namespace rynpsc\reviews\controllers;
 use Craft;
 use craft\web\Controller;
 use rynpsc\reviews\elements\Review;
-
 use rynpsc\reviews\models\ReviewType;
 use rynpsc\reviews\Plugin;
 use yii\web\ForbiddenHttpException;

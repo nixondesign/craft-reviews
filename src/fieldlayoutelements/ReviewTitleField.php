@@ -3,7 +3,6 @@
 namespace rynpsc\reviews\fieldlayoutelements;
 
 use craft\base\ElementInterface;
-
 use craft\fieldlayoutelements\TitleField;
 use craft\helpers\Html;
 use InvalidArgumentException;

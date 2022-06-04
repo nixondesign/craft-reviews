@@ -12,7 +12,6 @@ use craft\helpers\Db;
 use craft\helpers\StringHelper;
 use craft\models\UserGroup;
 use DateTime;
-
 use rynpsc\reviews\db\Table;
 use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\models\ReviewType;

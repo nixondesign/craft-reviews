@@ -3,7 +3,6 @@
 namespace rynpsc\reviews\services;
 
 use Craft;
-
 use craft\base\Component;
 use rynpsc\reviews\elements\Review;
 
