@@ -2,12 +2,12 @@
 
 namespace rynpsc\reviews\fieldlayoutelements;
 
-use rynpsc\reviews\elements\Review;
-
-use InvalidArgumentException;
 use craft\base\ElementInterface;
+
 use craft\fieldlayoutelements\TitleField;
 use craft\helpers\Html;
+use InvalidArgumentException;
+use rynpsc\reviews\elements\Review;
 
 class ReviewTitleField extends TitleField
 {

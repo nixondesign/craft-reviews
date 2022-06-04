@@ -2,9 +2,9 @@
 
 namespace rynpsc\reviews\records;
 
-use rynpsc\reviews\db\Table;
-
 use craft\db\ActiveRecord;
+
+use rynpsc\reviews\db\Table;
 
 class ReviewType extends ActiveRecord
 {

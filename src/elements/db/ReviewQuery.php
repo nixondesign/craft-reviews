@@ -3,21 +3,21 @@
 namespace rynpsc\reviews\elements\db;
 
 use craft\base\Element;
+use craft\db\Query;
 use craft\db\Table as CraftTable;
+use craft\elements\db\ElementQuery;
 use craft\elements\User;
 use craft\helpers\ArrayHelper;
+use craft\helpers\Db;
+use craft\helpers\StringHelper;
 use craft\models\UserGroup;
-use rynpsc\reviews\Plugin;
+use DateTime;
+
 use rynpsc\reviews\db\Table;
 use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\models\ReviewType;
 use rynpsc\reviews\models\Summary;
-
-use DateTime;
-use craft\db\Query;
-use craft\elements\db\ElementQuery;
-use craft\helpers\Db;
-use craft\helpers\StringHelper;
+use rynpsc\reviews\Plugin;
 use yii\base\InvalidConfigException;
 use yii\db\Exception;
 

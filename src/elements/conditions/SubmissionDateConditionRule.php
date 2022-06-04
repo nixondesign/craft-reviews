@@ -3,16 +3,15 @@
 namespace rynpsc\reviews\elements\conditions;
 
 use Craft;
-use craft\base\ElementInterface;
 use craft\base\conditions\BaseDateRangeConditionRule;
+use craft\base\ElementInterface;
 use craft\elements\conditions\ElementConditionRuleInterface;
 use craft\elements\db\ElementQueryInterface;
-use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\elements\db\ReviewQuery;
+use rynpsc\reviews\elements\Review;
 
 class SubmissionDateConditionRule extends BaseDateRangeConditionRule implements ElementConditionRuleInterface
 {
-
     public function getLabel(): string
     {
         return Craft::t('reviews', 'Submission Date');

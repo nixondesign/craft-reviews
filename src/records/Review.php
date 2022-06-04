@@ -2,10 +2,10 @@
 
 namespace rynpsc\reviews\records;
 
-use rynpsc\reviews\db\Table;
+use craft\db\ActiveRecord;
 
 use craft\elements\User;
-use craft\db\ActiveRecord;
+use rynpsc\reviews\db\Table;
 use yii\db\ActiveQueryInterface;
 
 class Review extends ActiveRecord

@@ -3,11 +3,11 @@
 namespace rynpsc\reviews\models;
 
 use Craft;
-use DateTime;
 use craft\base\Model;
 use craft\behaviors\FieldLayoutBehavior;
 use craft\validators\HandleValidator;
 use craft\validators\UniqueValidator;
+use DateTime;
 use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
 

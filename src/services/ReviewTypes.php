@@ -2,26 +2,26 @@
 
 namespace rynpsc\reviews\services;
 
-use rynpsc\reviews\db\Table;
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\enums\Permissions;
-use rynpsc\reviews\enums\ProjectConfig;
-use rynpsc\reviews\models\ReviewType;
-use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
-
 use Craft;
-use Throwable;
 use craft\base\Component;
 use craft\base\MemoizableArray;
 use craft\db\Query;
 use craft\events\ConfigEvent;
 use craft\helpers\ArrayHelper;
+
 use craft\helpers\Db;
 use craft\helpers\ProjectConfig as ProjectConfigHelper;
 use craft\helpers\Queue;
 use craft\helpers\StringHelper;
 use craft\models\FieldLayout;
 use craft\queue\jobs\ResaveElements;
+use rynpsc\reviews\db\Table;
+use rynpsc\reviews\elements\Review;
+use rynpsc\reviews\enums\Permissions;
+use rynpsc\reviews\enums\ProjectConfig;
+use rynpsc\reviews\models\ReviewType;
+use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
+use Throwable;
 
 class ReviewTypes extends Component
 {
@@ -56,7 +56,7 @@ class ReviewTypes extends Component
         }
 
         return ArrayHelper::where($this->getAllReviewTypes(), function(ReviewType $reviewType) use ($user) {
-           return $user->can(Permissions::VIEW_REVIEWS . ':' . $reviewType->uid);
+            return $user->can(Permissions::VIEW_REVIEWS . ':' . $reviewType->uid);
         });
     }
 

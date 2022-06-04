@@ -2,14 +2,14 @@
 
 namespace rynpsc\reviews\elements\conditions;
 
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\elements\db\ReviewQuery;
-
 use Craft;
-use craft\base\ElementInterface;
 use craft\base\conditions\BaseNumberConditionRule;
+
+use craft\base\ElementInterface;
 use craft\elements\conditions\ElementConditionRuleInterface;
 use craft\elements\db\ElementQueryInterface;
+use rynpsc\reviews\elements\db\ReviewQuery;
+use rynpsc\reviews\elements\Review;
 
 class RatingConditionRule extends BaseNumberConditionRule implements ElementConditionRuleInterface
 {

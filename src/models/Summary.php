@@ -2,8 +2,8 @@
 
 namespace rynpsc\reviews\models;
 
-use Exception;
 use craft\base\Model;
+use Exception;
 use yii\helpers\ArrayHelper;
 
 class Summary extends Model

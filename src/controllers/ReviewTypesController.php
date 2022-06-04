@@ -2,12 +2,12 @@
 
 namespace rynpsc\reviews\controllers;
 
-use rynpsc\reviews\Plugin;
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\models\ReviewType;
-
 use Craft;
 use craft\web\Controller;
+use rynpsc\reviews\elements\Review;
+
+use rynpsc\reviews\models\ReviewType;
+use rynpsc\reviews\Plugin;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;

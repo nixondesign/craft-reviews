@@ -3,30 +3,30 @@
 namespace rynpsc\reviews\elements;
 
 use Craft;
-use craft\helpers\ArrayHelper;
-use DateTime;
-use RuntimeException;
 use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\db\Query;
-use craft\elements\User;
 use craft\elements\actions\CopyReferenceTag;
 use craft\elements\actions\Delete;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\db\ElementQueryInterface;
+use craft\elements\User;
 use craft\helpers\App;
+use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
 use craft\validators\DateTimeValidator;
 use craft\web\CpScreenResponseBehavior;
-use rynpsc\reviews\Plugin;
+use DateTime;
+use RuntimeException;
 use rynpsc\reviews\db\Table;
 use rynpsc\reviews\elements\conditions\ReviewCondition;
 use rynpsc\reviews\elements\db\ReviewQuery;
 use rynpsc\reviews\enums\Permissions;
 use rynpsc\reviews\models\ReviewType;
+use rynpsc\reviews\Plugin;
 use rynpsc\reviews\records\Review as ReviewRecord;
 use rynpsc\reviews\web\assets\ReviewsAsset;
 use yii\base\InvalidConfigException;
@@ -565,7 +565,7 @@ class Review extends Element
                 }
 
                 return $author;
-            }
+            },
         ];
     }
 
@@ -816,11 +816,11 @@ class Review extends Element
 
         $isCp = Craft::$app->getRequest()->isCpRequest;
 
-        $rules[] = [['email'], 'required', 'when' => function () use ($isCp) {
+        $rules[] = [['email'], 'required', 'when' => function() use ($isCp) {
             return !$isCp && $this->getIsGuest();
         }];
 
-        $rules[] = [['fullName'], 'required', 'when' => function () use ($isCp) {
+        $rules[] = [['fullName'], 'required', 'when' => function() use ($isCp) {
             return !$isCp && $this->getType()->requireFullName && $this->getIsGuest();
         }];
 

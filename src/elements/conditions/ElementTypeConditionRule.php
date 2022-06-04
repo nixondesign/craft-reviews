@@ -2,15 +2,15 @@
 
 namespace rynpsc\reviews\elements\conditions;
 
-use rynpsc\reviews\elements\db\ReviewQuery;
-use rynpsc\reviews\elements\Review;
-
 use Craft;
 use craft\base\BlockElementInterface;
-use craft\base\ElementInterface;
+
 use craft\base\conditions\BaseMultiSelectConditionRule;
+use craft\base\ElementInterface;
 use craft\elements\conditions\ElementConditionRuleInterface;
 use craft\elements\db\ElementQueryInterface;
+use rynpsc\reviews\elements\db\ReviewQuery;
+use rynpsc\reviews\elements\Review;
 
 class ElementTypeConditionRule extends BaseMultiSelectConditionRule implements ElementConditionRuleInterface
 {

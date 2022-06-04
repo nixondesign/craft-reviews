@@ -2,10 +2,10 @@
 
 namespace rynpsc\reviews\services;
 
-use rynpsc\reviews\elements\Review;
-
 use Craft;
+
 use craft\base\Component;
+use rynpsc\reviews\elements\Review;
 
 class Reviews extends Component
 {

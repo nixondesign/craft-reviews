@@ -2,10 +2,10 @@
 
 namespace rynpsc\reviews\controllers;
 
-use rynpsc\reviews\Plugin;
-
 use Craft;
+
 use craft\web\Controller;
+use rynpsc\reviews\Plugin;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
 

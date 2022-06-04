@@ -11,8 +11,8 @@ use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\Cp;
 use craft\models\FieldLayout;
 use craft\services\UserPermissions;
-use craft\web\UrlManager;
 use craft\web\twig\variables\CraftVariable;
+use craft\web\UrlManager;
 use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\enums\Permissions;
 use rynpsc\reviews\enums\ProjectConfig;
@@ -20,8 +20,8 @@ use rynpsc\reviews\fieldlayoutelements\RatingField;
 use rynpsc\reviews\fieldlayoutelements\ReviewField;
 use rynpsc\reviews\fieldlayoutelements\ReviewTitleField;
 use rynpsc\reviews\models\Settings;
-use rynpsc\reviews\services\ReviewTypes;
 use rynpsc\reviews\services\Reviews;
+use rynpsc\reviews\services\ReviewTypes;
 use rynpsc\reviews\services\Users;
 use rynpsc\reviews\web\twig\Variable;
 use yii\base\Event;
@@ -151,7 +151,7 @@ class Plugin extends BasePlugin
         Event::on(
             FieldLayout::class,
             FieldLayout::EVENT_DEFINE_NATIVE_FIELDS,
-            static function (DefineFieldLayoutFieldsEvent $event) {
+            static function(DefineFieldLayoutFieldsEvent $event) {
                 $fieldLayout = $event->sender;
 
                 if ($fieldLayout->type !== Review::class) {
@@ -185,7 +185,7 @@ class Plugin extends BasePlugin
         Event::on(
             Cp::class,
             Cp::EVENT_DEFINE_ELEMENT_INNER_HTML,
-            static function (DefineElementInnerHtmlEvent $event) {
+            static function(DefineElementInnerHtmlEvent $event) {
                 if (!($event->element instanceof Review)) {
                     return;
                 }
@@ -222,7 +222,7 @@ class Plugin extends BasePlugin
         Event::on(
             UserPermissions::class,
             UserPermissions::EVENT_REGISTER_PERMISSIONS,
-            function (RegisterUserPermissionsEvent $event) {
+            function(RegisterUserPermissionsEvent $event) {
                 $permissions = [];
                 $reviewTypes = $this->getReviewTypes()->getAllReviewTypes();
 
@@ -250,7 +250,7 @@ class Plugin extends BasePlugin
                                     $reviewType->getPermissionKey(Permissions::DELETE_PEER_REVIEWS) => [
                                         'label' => Craft::t('reviews', 'Delete other users’ reviews'),
                                     ],
-                                ]
+                                ],
                             ],
                         ],
                     ];
