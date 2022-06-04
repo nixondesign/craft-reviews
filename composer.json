@@ -29,5 +29,10 @@
 	"extra": {
 		"name": "Reviews",
 		"handle": "reviews"
+	},
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"require-dev": {
+		"craftcms/ecs": "dev-main"
 	}
 }
