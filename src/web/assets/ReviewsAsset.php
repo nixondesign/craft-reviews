@@ -15,10 +15,6 @@ class ReviewsAsset extends AssetBundle
             CpAsset::class,
         ];
 
-        $this->js = [
-            'reviews.js',
-        ];
-
         $this->css = [
             'reviews.css',
         ];
