@@ -37,7 +37,7 @@ class ReviewTypesController extends Controller
 
         if ($reviewType === null) {
             if ($reviewTypeId !== null) {
-                $reviewType = Plugin::getInstance()->getReviewTypes()->getReviewTypeById($reviewTypeId);
+                $reviewType = Plugin::getInstance()->getReviewTypes()->getTypeById($reviewTypeId);
 
                 if ($reviewType === null) {
                     throw new NotFoundHttpException('Review type not found');
@@ -68,18 +68,19 @@ class ReviewTypesController extends Controller
         $reviewTypesService = Plugin::getInstance()->getReviewTypes();
 
         if ($reviewTypeId) {
-            $reviewType = $reviewTypesService->getReviewTypeById($reviewTypeId);
+            $reviewType = $reviewTypesService->getTypeById($reviewTypeId);
         } else {
             $reviewType = new ReviewType();
         }
 
-        $reviewType->name = $this->request->getParam('name');
-        $reviewType->handle = $this->request->getParam('handle');
-        $reviewType->maxRating = $this->request->getParam('maxRating');
-        $reviewType->allowGuestReviews = $this->request->getParam('allowGuestReviews');
-        $reviewType->requireGuestEmail = $this->request->getParam('requireGuestEmail');
-        $reviewType->requireGuestName = $this->request->getParam('requireGuestName');
-        $reviewType->defaultStatus = $this->request->getParam('defaultStatus');
+        $reviewType->name = $this->request->getBodyParam('name', $reviewType->name);
+        $reviewType->handle = $this->request->getBodyParam('handle', $reviewType->handle);
+        $reviewType->maxRating = (int)$this->request->getBodyParam('maxRating', $reviewType->maxRating);
+        $reviewType->allowGuestReviews = (bool)$this->request->getBodyParam('allowGuestReviews', $reviewType->allowGuestReviews);
+        $reviewType->requireFullName = (bool)$this->request->getBodyParam('requireFullName', $reviewType->requireFullName);
+        $reviewType->defaultStatus = $this->request->getBodyParam('defaultStatus', $reviewType->defaultStatus);
+        $reviewType->hasTitleField = (bool)$this->request->getBodyParam('hasTitleField', $reviewType->hasTitleField);
+        $reviewType->titleFormat = $this->request->getBodyParam('titleFormat', $reviewType->titleFormat);
 
         $fieldLayout = Craft::$app->getFields()->assembleLayoutFromPost();
         $fieldLayout->type = Review::class;

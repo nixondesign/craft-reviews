@@ -2,15 +2,18 @@
 
 namespace rynpsc\reviews\models;
 
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
-
 use Craft;
+use DateTime;
 use craft\base\Model;
 use craft\behaviors\FieldLayoutBehavior;
 use craft\validators\HandleValidator;
 use craft\validators\UniqueValidator;
+use rynpsc\reviews\elements\Review;
+use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
 
+/**
+ * @property-read array $config
+ */
 class ReviewType extends Model
 {
     public ?int $id = null;
@@ -23,19 +26,21 @@ class ReviewType extends Model
 
     public bool $allowGuestReviews = true;
 
-    public bool $requireGuestEmail = true;
-
-    public bool $requireGuestName = true;
+    public bool $requireFullName = true;
 
     public string $defaultStatus = Review::STATUS_PENDING;
 
     public ?string $uid = null;
 
+    public bool $hasTitleField = true;
+
+    public ?string $titleFormat = null;
+
     public int $maxRating = 5;
 
-    public $dateCreated = null;
+    public ?DateTime $dateCreated = null;
 
-    public $dateUpdated = null;
+    public ?DateTime $dateUpdated = null;
 
     /**
      * Use the translated review type's name as the string representation.
@@ -83,8 +88,7 @@ class ReviewType extends Model
         $rules[] = [['id', 'fieldLayoutId', 'maxRating'], 'number', 'integerOnly' => true];
 
         $rules[] = [['allowGuestReviews'], 'boolean'];
-        $rules[] = [['requireGuestEmail'], 'boolean'];
-        $rules[] = [['requireGuestName'], 'boolean'];
+        $rules[] = [['requireFullName'], 'boolean'];
 
         $rules[] = [['handle'], HandleValidator::class];
 
@@ -92,6 +96,50 @@ class ReviewType extends Model
         $rules[] = [['name', 'handle'], 'string', 'max' => 255];
         $rules[] = [['name', 'handle'], UniqueValidator::class, 'targetClass' => ReviewTypeRecord::class];
 
+        $rules[] = [['titleFormat'], 'required', 'when' => function() {
+            return $this->hasTitleField === false;
+        }];
+
         return $rules;
+    }
+
+    /**
+     * Returns the review type’s project config.
+     *
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        $config = [
+            'name' => $this->name,
+            'handle' => $this->handle,
+            'maxRating' => $this->maxRating,
+            'allowGuestReviews' => $this->allowGuestReviews,
+            'requireFullName' => $this->requireFullName,
+            'defaultStatus' => $this->defaultStatus,
+            'hasTitleField' => $this->hasTitleField,
+            'titleFormat' => $this->titleFormat,
+        ];
+
+        $fieldLayout = $this->getFieldLayout();
+
+        if ($fieldLayoutConfig = $fieldLayout->getConfig()) {
+            $config['fieldLayouts'] = [
+                $fieldLayout->uid => $fieldLayoutConfig,
+            ];
+        }
+
+        return $config;
+    }
+
+    /**
+     * Gets the name of a given Permission suffixed with the UID.
+     *
+     * @param $prefix
+     * @return string
+     */
+    public function getPermissionKey($prefix): string
+    {
+        return "$prefix:$this->uid";
     }
 }

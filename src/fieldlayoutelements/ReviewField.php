@@ -4,30 +4,26 @@ namespace rynpsc\reviews\fieldlayoutelements;
 
 use Craft;
 use craft\base\ElementInterface;
-use craft\fieldlayoutelements\StandardField;
+use craft\fieldlayoutelements\TextareaField;
 
-class ReviewField extends StandardField
+class ReviewField extends TextareaField
 {
-    /**
-     * @inheritdoc
-     */
-    public function attribute(): string
-    {
-        return 'review';
-    }
+    public const ATTRIBUTE = 'review';
 
     /**
      * @inheritdoc
      */
-    public function mandatory(): bool
-    {
-        return true;
-    }
+    public string $attribute = self::ATTRIBUTE;
 
     /**
      * @inheritdoc
      */
-    protected function defaultLabel(ElementInterface $element = null, bool $static = false): string
+    public bool $requirable = true;
+
+    /**
+     * @inheritdoc
+     */
+    protected function defaultLabel(ElementInterface $element = null, bool $static = false): ?string
     {
         return Craft::t('reviews', 'Review');
     }
@@ -35,13 +31,24 @@ class ReviewField extends StandardField
     /**
      * @inheritdoc
      */
-    protected function inputHtml(ElementInterface $element = null, bool $static = false): string
+    protected function statusClass(?ElementInterface $element = null, bool $static = false): ?string
     {
-        return Craft::$app->getView()->renderTemplate('_includes/forms/textarea', [
-            'id' => $this->id(),
-            'name' => 'review',
-            'value' => $this->value($element),
-            'rows' => 15,
-        ]);
+        if ($element && ($status = $element->getAttributeStatus(self::ATTRIBUTE))) {
+            return $status[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function statusLabel(?ElementInterface $element = null, bool $static = false): ?string
+    {
+        if ($element && ($status = $element->getAttributeStatus(self::ATTRIBUTE))) {
+            return $status[1];
+        }
+
+        return null;
     }
 }

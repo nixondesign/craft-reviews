@@ -2,27 +2,28 @@
 
 namespace rynpsc\reviews;
 
-use rynpsc\reviews\db\Table;
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\enums\Permissions;
-use rynpsc\reviews\fieldlayoutelements\RatingField;
-use rynpsc\reviews\fieldlayoutelements\ReviewField;
-use rynpsc\reviews\models\Settings;
-use rynpsc\reviews\services\ReviewTypes;
-use rynpsc\reviews\services\Reviews;
-use rynpsc\reviews\web\twig\Variable;
-
 use Craft;
 use craft\base\Plugin as BasePlugin;
+use craft\events\DefineElementInnerHtmlEvent;
 use craft\events\DefineFieldLayoutFieldsEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
-use craft\events\UserEvent;
+use craft\helpers\Cp;
 use craft\models\FieldLayout;
 use craft\services\UserPermissions;
-use craft\services\Users;
 use craft\web\UrlManager;
 use craft\web\twig\variables\CraftVariable;
+use rynpsc\reviews\elements\Review;
+use rynpsc\reviews\enums\Permissions;
+use rynpsc\reviews\enums\ProjectConfig;
+use rynpsc\reviews\fieldlayoutelements\RatingField;
+use rynpsc\reviews\fieldlayoutelements\ReviewField;
+use rynpsc\reviews\fieldlayoutelements\ReviewTitleField;
+use rynpsc\reviews\models\Settings;
+use rynpsc\reviews\services\ReviewTypes;
+use rynpsc\reviews\services\Reviews;
+use rynpsc\reviews\services\Users;
+use rynpsc\reviews\web\twig\Variable;
 use yii\base\Event;
 
 /**
@@ -32,29 +33,28 @@ use yii\base\Event;
  */
 class Plugin extends BasePlugin
 {
-    public $hasCpSection = true;
+    /**
+     * @inheritdoc
+     */
+    public bool $hasCpSection = true;
 
-    public $hasCpSettings = true;
+    /**
+     * @inheritdoc
+     */
+    public bool $hasCpSettings = true;
 
-    public static function addEditUserReviewsTab(array &$context): void
+    /**
+     * @inerhitdoc
+     */
+    public static function config(): array
     {
-        $context['tabs']['reviews'] = [
-            'label' => Craft::t('reviews', 'Reviews'),
-            'url' => '#reviews',
+        return [
+            'components' => [
+                'reviews' => ['class' => Reviews::class],
+                'reviewTypes' => ['class' => ReviewTypes::class],
+                'users' => ['class' => Users::class],
+            ],
         ];
-    }
-
-    public static function addEditUserReviewsTabContent(array &$context): string
-    {
-        if (!$context['user'] || $context['isNewUser']) {
-            return '';
-        }
-
-        $user = Craft::$app->getUsers()->getUserById($context['user']->id);
-
-        return Craft::$app->getView()->renderTemplate('reviews/edit-user-tab', [
-            'user' => $user,
-        ]);
     }
 
     /**
@@ -64,32 +64,16 @@ class Plugin extends BasePlugin
     {
         parent::init();
 
-        $this->setComponents([
-            'reviews' => Reviews::class,
-            'reviewTypes' => ReviewTypes::class,
-        ]);
-
-        $this->registerCpRoutes();
-        $this->registerFieldLayout();
+        $this->registerElementEvents();
         $this->registerProjectConfigEventListeners();
         $this->registerTemplateHooks();
         $this->registerUserPermissions();
-        $this->registerUsersListeners();
         $this->registerVariables();
-    }
 
-    /**
-     * @inheritdoc
-     */
-    public function beforeInstall(): bool
-    {
-        if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 80002) {
-            Craft::error('Reviews requires PHP 8.0.2 or later.');
-
-            return false;
+        if (Craft::$app->getRequest()->getIsCpRequest()) {
+            $this->registerCpRoutes();
+            $this->defineFieldLayoutFields();
         }
-
-        return true;
     }
 
     /**
@@ -105,33 +89,40 @@ class Plugin extends BasePlugin
 
         $item['label'] = Craft::t('reviews', 'Reviews');
 
-        $item['badgeCount'] = Craft::configure(Review::find(), [
-            'site' => '*',
-            'moderationStatus' => Review::STATUS_PENDING,
-        ])->count();
+        if ($this->settings->showSidebarBadge) {
+            $item['badgeCount'] = Craft::configure(Review::find(), [
+                'site' => '*',
+                'status' => null,
+                'moderationStatus' => Review::STATUS_PENDING,
+            ])->count();
+        }
 
         if (Craft::$app->getUser()->getIsAdmin() && Craft::$app->getConfig()->getGeneral()->allowAdminChanges) {
-            $item['subnav'] = [
-                'reviews' => [
-                    'label' => Craft::t('reviews', 'Reviews'),
-                    'url' => 'reviews',
-                ],
+            $item['subnav']['reviews'] = [
+                'label' => Craft::t('reviews', 'Reviews'),
+                'url' => 'reviews',
+            ];
 
-                'settings' => [
-                    'label' => Craft::t('reviews', 'Settings'),
-                    'url' => 'reviews/settings',
-                ],
+            $item['subnav']['settings'] = [
+                'label' => Craft::t('reviews', 'Settings'),
+                'url' => 'reviews/settings',
             ];
         }
 
         return $item;
     }
 
+    /**
+     * Returns the reviews service.
+     */
     public function getReviews(): Reviews
     {
         return $this->get('reviews');
     }
 
+    /**
+     * Returns the review types service.
+     */
     public function getReviewTypes(): ReviewTypes
     {
         return $this->get('reviewTypes');
@@ -155,30 +146,11 @@ class Plugin extends BasePlugin
         ]);
     }
 
-    private function registerCpRoutes(): void
-    {
-        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
-            $event->rules = array_merge($event->rules, [
-                'reviews' => 'reviews/reviews/index',
-                'reviews/<reviewId:\d+>' => 'reviews/reviews/edit-review',
-                'reviews/new' => 'reviews/reviews/edit-review',
-                'reviews/new/<siteHandle:{handle}>' => 'reviews/reviews/edit-review',
-
-                'reviews/settings/types' => 'reviews/review-types/index',
-                'reviews/settings/types/new' => 'reviews/review-types/edit-type',
-                'reviews/settings/types/<reviewTypeId:\d+>' => 'reviews/review-types/edit-type',
-
-                'reviews/settings' => ['template' => 'reviews/settings'],
-                'reviews/settings/general' => 'reviews/settings/edit',
-            ]);
-        });
-    }
-
-    private function registerFieldLayout(): void
+    private function defineFieldLayoutFields(): void
     {
         Event::on(
             FieldLayout::class,
-            FieldLayout::EVENT_DEFINE_STANDARD_FIELDS,
+            FieldLayout::EVENT_DEFINE_NATIVE_FIELDS,
             static function (DefineFieldLayoutFieldsEvent $event) {
                 $fieldLayout = $event->sender;
 
@@ -186,8 +158,41 @@ class Plugin extends BasePlugin
                     return;
                 }
 
+                $event->fields[] = ReviewTitleField::class;
                 $event->fields[] = RatingField::class;
                 $event->fields[] = ReviewField::class;
+            }
+        );
+    }
+
+    private function registerCpRoutes(): void
+    {
+        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
+            $event->rules = array_merge($event->rules, [
+                'reviews' => 'reviews/reviews/index',
+                'reviews/<typeHandle:{handle}>/<elementId:\d+><slug:(?:-[^\/]*)?>' => 'elements/edit',
+                'reviews/settings' => ['template' => 'reviews/settings'],
+                'reviews/settings/general' => 'reviews/settings/edit',
+                'reviews/settings/types' => 'reviews/review-types/index',
+                'reviews/settings/types/new' => 'reviews/review-types/edit-type',
+                'reviews/settings/types/<reviewTypeId:\d+>' => 'reviews/review-types/edit-type',
+            ]);
+        });
+    }
+
+    private function registerElementEvents(): void
+    {
+        Event::on(
+            Cp::class,
+            Cp::EVENT_DEFINE_ELEMENT_INNER_HTML,
+            static function (DefineElementInnerHtmlEvent $event) {
+                if (!($event->element instanceof Review)) {
+                    return;
+                }
+
+                $event->innerHtml = Craft::$app->getView()->renderTemplate('reviews/elements/_element', [
+                    'review' => $event->element,
+                ]);
             }
         );
     }
@@ -197,41 +202,19 @@ class Plugin extends BasePlugin
         $reviewTypesService = $this->getReviewTypes();
 
         Craft::$app->projectConfig
-            ->onAdd('reviews.reviewTypes.{uid}', [$reviewTypesService, 'handleChangedReviewType'])
-            ->onUpdate('reviews.reviewTypes.{uid}', [$reviewTypesService, 'handleChangedReviewType'])
-            ->onRemove('reviews.reviewTypes.{uid}', [$reviewTypesService, 'handleDeletedReviewType']);
+            ->onAdd(ProjectConfig::PATH_REVIEW_TYPES . '.{uid}', [$reviewTypesService, 'handleChangedReviewType'])
+            ->onUpdate(ProjectConfig::PATH_REVIEW_TYPES . '.{uid}', [$reviewTypesService, 'handleChangedReviewType'])
+            ->onRemove(ProjectConfig::PATH_REVIEW_TYPES . '.{uid}', [$reviewTypesService, 'handleDeletedReviewType']);
     }
 
     private function registerTemplateHooks(): void
     {
         $view = Craft::$app->getView();
 
-        $view->hook('cp.users.edit', [$this, 'addEditUserReviewsTab']);
-        $view->hook('cp.users.edit.content', [$this, 'addEditUserReviewsTabContent']);
-        $view->hook('cp.elements.element', [Review::class, 'getReviewElementTitleHtml']);
-    }
-
-    private function registerUsersListeners(): void
-    {
-        Event::on(
-            Users::class,
-            Users::EVENT_AFTER_ACTIVATE_USER,
-            static function (UserEvent $event) {
-                $email = $event->user->email;
-                $userId = $event->user->id;
-
-                Craft::$app->db->createCommand()->update(
-                    Table::REVIEWS,
-                    [
-                        'userId' => $userId,
-                        'fullName' => null,
-                        'email' => null,
-                    ],
-                    'email = :email',
-                    [':email' => $email]
-                )->execute();
-            }
-        );
+        if ($this->getSettings()->showUserReviewsTab && Craft::$app->getRequest()->getIsCpRequest()) {
+            $view->hook('cp.users.edit', [Users::class, 'addEditUserReviewsTab']);
+            $view->hook('cp.users.edit.content', [Users::class, 'addEditUserReviewsTabContent']);
+        }
     }
 
     private function registerUserPermissions(): void
@@ -240,35 +223,42 @@ class Plugin extends BasePlugin
             UserPermissions::class,
             UserPermissions::EVENT_REGISTER_PERMISSIONS,
             function (RegisterUserPermissionsEvent $event) {
+                $permissions = [];
                 $reviewTypes = $this->getReviewTypes()->getAllReviewTypes();
 
-                $reviewTypePermissions = [];
-
                 foreach ($reviewTypes as $reviewType) {
-                    $suffix = ':' . $reviewType->uid;
-
-                    $reviewTypePermissions['reviews-manageReviews' . $suffix] = [
-                        'label' => Craft::t('reviews', 'Manage "{title}" reviews', [
-                            'title' => Craft::t('reviews', $reviewType->name),
-                        ]),
+                    $permissions[$reviewType->getPermissionKey(Permissions::VIEW_REVIEWS)] = [
+                        'label' => Craft::t('reviews', 'View “{type}” reviews', ['type' => $reviewType->name]),
 
                         'nested' => [
-                            Permissions::VIEW_REVIEWS . $suffix => [
-                                'label' => Craft::t('reviews', 'Edit reviews'),
+                            $reviewType->getPermissionKey(Permissions::SAVE_REVIEWS) => [
+                                'label' => Craft::t('reviews', 'Save reviews'),
                             ],
 
-                            Permissions::DELETE_REVIEWS . $suffix => [
+                            $reviewType->getPermissionKey(Permissions::DELETE_REVIEWS) => [
                                 'label' => Craft::t('reviews', 'Delete reviews'),
                             ],
-                        ]
+
+                            $reviewType->getPermissionKey(Permissions::VIEW_PEER_REVIEWS) => [
+                                'label' => Craft::t('reviews', 'View other users’ reviews'),
+
+                                'nested' => [
+                                    $reviewType->getPermissionKey(Permissions::SAVE_PEER_REVIEWS) => [
+                                        'label' => Craft::t('reviews', 'Save other users’ reviews'),
+                                    ],
+
+                                    $reviewType->getPermissionKey(Permissions::DELETE_PEER_REVIEWS) => [
+                                        'label' => Craft::t('reviews', 'Delete other users’ reviews'),
+                                    ],
+                                ]
+                            ],
+                        ],
                     ];
                 }
 
-                $event->permissions[Craft::t('reviews', 'Reviews')] = [
-                    'reviews-manageReviews' => [
-                        'label' => Craft::t('reviews', 'Mange reviews'),
-                        'nested' => $reviewTypePermissions,
-                    ],
+                $event->permissions[] = [
+                    'heading' => Craft::t('reviews', 'Reviews'),
+                    'permissions' => $permissions,
                 ];
             }
         );

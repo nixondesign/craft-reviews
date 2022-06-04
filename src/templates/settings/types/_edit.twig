@@ -4,8 +4,8 @@
 {% set selectedSubnavItem = 'settings' %}
 
 {% set crumbs = [
-    { label: 'Reviews' | t('reviews'), url: url('reviews') },
-    { label: 'Review types' | t('reviews'), url: url('reviews/settings/types') },
+    { label: 'Reviews'|t('reviews'), url: url('reviews') },
+    { label: 'Review types'|t('reviews'), url: url('reviews/settings/types') },
 ] %}
 
 {% import "_includes/forms" as forms %}
@@ -40,6 +40,37 @@
         required: true,
     }) }}
 
+	<hr>
+
+	{{ forms.checkboxField({
+		label: 'Show the Title field'|t('reviews'),
+		instructions: 'Allow the user the manually edit the title.'|t('reviews'),
+		name: 'hasTitleField',
+		value: 1,
+		checked: reviewType.hasTitleField,
+		errors: reviewType.getErrors('hasTitleField'),
+		reverseToggle: '#title-format-container, .fld-title-field-icon',
+	}) }}
+
+	{% tag 'div' with {
+		id: 'title-format-container',
+		class: (reviewType.hasTitleField ? 'hidden'),
+	} %}
+		{{ forms.textField({
+			label: 'Title Format'|t('reviews'),
+			instructions: 'The format to use for auto-generated review titles. You can include tags that output review properties, such as {myCustomField}.'|t('reviews'),
+			id: 'titleFormat',
+			name: 'titleFormat',
+			autocorrect: false,
+			autocapitalize: false,
+			value: reviewType.titleFormat,
+			errors: reviewType.getErrors('titleFormat'),
+			required: true,
+		}) }}
+	{% endtag %}
+
+	<hr>
+
 	{{ forms.textField({
 		label: 'Maximum Rating'|t('reviews'),
 		instructions: 'The maximum rating a review can have.'|t('reviews'),
@@ -48,11 +79,11 @@
 		inputmode: 'numeric',
 		value: reviewType.maxRating,
 		errors: reviewType.getErrors('maxRating'),
-		warning: 'Warning changing the maximum rating does not modify ratings for existing reviews.',
+		warning: not isNew ? 'Warning changing the maximum rating does not modify ratings for existing reviews.'|t('reviews'),
 	}) }}
 
     {{ forms.selectField({
-        label: 'Default Status',
+        label: 'Default Status'|t('reviews'),
         instructions: 'Default status to assign to reviews.'|t('reviews'),
         name: 'defaultStatus',
         options: statuses,
@@ -60,35 +91,31 @@
         errors: reviewType.getErrors('defaultStatus'),
     }) }}
 
+	<hr>
+
     {{ forms.checkboxField({
-        label: 'Allow guest reviews',
+        label: 'Allow guest reviews'|t('reviews'),
         instructions: 'Allow non-logged in users to submit reviews.'|t('reviews'),
         name: 'allowGuestReviews',
         value: 1,
         checked: reviewType.allowGuestReviews,
         errors: reviewType.getErrors('allowGuestReviews'),
-        toggle: 'guest-review-settings',
+		toggle: '#guest-settings-container',
     }) }}
 
-    <div id="guest-review-settings" class="indent {{ reviewType.allowGuestReviews ? 'hidden' }}">
-        {{ forms.checkboxField({
-            label: 'Require guest name',
-            instructions: 'Require a name for guest reviews.'|t('reviews'),
-            name: 'requireGuestName',
-            value: 1,
-            checked: reviewType.requireGuestName,
-            errors: reviewType.getErrors('requireGuestName'),
-        }) }}
-
-        {{ forms.checkboxField({
-            label: 'Require guest email address',
-            instructions: 'Require an email address for guest reviews.'|t('reviews'),
-            name: 'requireGuestEmail',
-            value: 1,
-            checked: reviewType.requireGuestEmail,
-            errors: reviewType.getErrors('requireGuestEmail'),
-        }) }}
-    </div>
+	{% tag 'div' with {
+		id: 'guest-settings-container',
+		class: (not reviewType.allowGuestReviews ? 'hidden'),
+	} %}
+		{{ forms.checkboxField({
+			label: 'Require guest name'|t('reviews'),
+			instructions: 'Require a name for guest reviews.'|t('reviews'),
+			name: 'requireFullName',
+			value: 1,
+			checked: reviewType.requireFullName,
+			errors: reviewType.getErrors('requireFullName'),
+		}) }}
+	{% endtag %}
 
     <hr>
 

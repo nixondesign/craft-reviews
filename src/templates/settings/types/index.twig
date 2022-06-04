@@ -5,17 +5,18 @@
 {% do view.registerAssetBundle('craft\\web\\assets\\admintable\\AdminTableAsset') -%}
 
 {% do view.registerTranslations('reviews', [
-    "Name",
-    "Handle",
-    "No review types exist yet.",
+    'Name',
+    'Handle',
+	'Allow Guest Reviews',
+    'No review types exist yet.',
 ]) %}
 
 {% block actionButton %}
-    <a href="{{ url('reviews/settings/types/new') }}" class="btn submit add icon">{{ "New review type"|t('reviews') }}</a>
+    <a href="{{ url('reviews/settings/types/new') }}" class="btn submit add icon">{{ 'New review type'|t('reviews') }}</a>
 {% endblock %}
 
 {% set crumbs = [
-    { label: "Settings"|t('app'), url: url('reviews/settings') }
+    { label: "Settings"|t('reviews'), url: url('reviews/settings') }
 ] %}
 
 {% block content %}
@@ -60,7 +61,7 @@
         columns: columns,
         container: '#reviewtypes-vue-admin-table',
         deleteAction: 'reviews//review-types/delete-review-type',
-        emptyMessage: Craft.t('app', 'No review types exist yet.'),
+        emptyMessage: Craft.t('reviews', 'No review types exist yet.'),
         tableData: {{ tableData|json_encode|raw }}
     });
 {% endjs %}

@@ -2,6 +2,11 @@
 
 namespace rynpsc\reviews\elements\db;
 
+use craft\base\Element;
+use craft\db\Table as CraftTable;
+use craft\elements\User;
+use craft\helpers\ArrayHelper;
+use craft\models\UserGroup;
 use rynpsc\reviews\Plugin;
 use rynpsc\reviews\db\Table;
 use rynpsc\reviews\elements\Review;
@@ -14,22 +19,22 @@ use craft\elements\db\ElementQuery;
 use craft\helpers\Db;
 use craft\helpers\StringHelper;
 use yii\base\InvalidConfigException;
+use yii\db\Exception;
 
 class ReviewQuery extends ElementQuery
 {
-    public $after;
-    public $before;
-    public $element;
-    public $elementId;
-    public $email;
-    public $fullName;
-    public $moderationStatus;
-    public $rating;
-    public $review;
-    public $submissionDate;
-    public $type;
-    public $typeId;
-    public $userId;
+    public mixed $after = null;
+    public mixed $before = null;
+    public mixed $elementId = null;
+    public ?string $email = null;
+    public mixed $moderationStatus = null;
+    public mixed $rating = null;
+    public mixed $review = null;
+    public mixed $submissionDate = null;
+    public mixed $subjectElementType = null;
+    public mixed $typeId = null;
+    public mixed $authorId = null;
+    public mixed $authorGroupId = null;
 
     /**
      * @inheritdoc
@@ -47,7 +52,7 @@ class ReviewQuery extends ElementQuery
     /**
      * @inheritdoc
      */
-    protected $defaultOrderBy = [
+    protected array $defaultOrderBy = [
         'reviews_reviews.submissionDate' => SORT_DESC,
     ];
 
@@ -65,7 +70,12 @@ class ReviewQuery extends ElementQuery
 
     public function element($value): self
     {
-        $this->elementId = $value->id;
+        $this->elementId = $this->parseModelHandle(
+            $value,
+            Element::class,
+            CraftTable::ELEMENTS,
+        );
+
         return $this;
     }
 
@@ -75,15 +85,15 @@ class ReviewQuery extends ElementQuery
         return $this;
     }
 
-    public function email($value): self
+    public function subjectElementType($value): self
     {
-        $this->email = $value;
+        $this->subjectElementType = $value;
         return $this;
     }
 
-    public function fullName($value): self
+    public function email($value): self
     {
-        $this->fullName = $value;
+        $this->email = $value;
         return $this;
     }
 
@@ -107,17 +117,11 @@ class ReviewQuery extends ElementQuery
 
     public function type($value): self
     {
-        if ($value instanceof ReviewType) {
-            $this->typeId = $value->id;
-        } elseif ($value !== null) {
-            $this->typeId = (new Query())
-                ->select(['id'])
-                ->from([Table::REVIEWTYPES])
-                ->where(Db::parseParam('handle', $value))
-                ->scalar();
-        } else {
-            $this->typeId = null;
-        }
+        $this->typeId = $this->parseModelHandle(
+            $value,
+            ReviewType::class,
+            Table::REVIEWTYPES,
+        );
 
         return $this;
     }
@@ -128,14 +132,37 @@ class ReviewQuery extends ElementQuery
         return $this;
     }
 
-    public function userId($value): self
+    public function user($value): self
     {
-        $this->userId = $value;
+        $this->authorId = $this->parseModelHandle($value, User::class);
+        return $this;
+    }
+
+    public function authorId($value): self
+    {
+        $this->authorId = $value;
+        return $this;
+    }
+
+    public function authorGroup($value): self
+    {
+        $this->authorGroupId = $this->parseModelHandle(
+            $value,
+            UserGroup::class,
+            CraftTable::USERGROUPS,
+        );
+
+        return $this;
+    }
+
+    public function authorGroupId($value): self
+    {
+        $this->authorId = $value;
         return $this;
     }
 
     /**
-     * @throws InvalidConfigException
+     * @throws InvalidConfigException|Exception
      */
     public function summary($db = null): ?Summary
     {
@@ -145,7 +172,7 @@ class ReviewQuery extends ElementQuery
             throw new InvalidConfigException("Query is missing a valid 'type' or 'typeId' parameter.");
         }
 
-        $type = $typesService->getReviewTypeById($this->typeId);
+        $type = $typesService->getTypeById($this->typeId);
 
         if ($type === null) {
             return null;
@@ -188,31 +215,26 @@ class ReviewQuery extends ElementQuery
         $this->query->select([
             'reviews_reviews.submissionDate',
             'reviews_reviews.elementId',
-            'reviews_reviews.email',
             'reviews_reviews.id',
-            'reviews_reviews.fullName',
             'reviews_reviews.rating',
             'reviews_reviews.review',
             'reviews_reviews.siteId',
             'reviews_reviews.typeId',
-            'reviews_reviews.userId',
+            'reviews_reviews.authorId',
             'reviews_reviews.moderationStatus',
         ]);
 
         if ($this->elementId) {
-            $this->subQuery->andWhere(Db::parseParam('reviews_reviews.elementId', $this->elementId));
+            $this->subQuery->andWhere(Db::parseNumericParam('reviews_reviews.elementId', $this->elementId));
         }
 
         if ($this->email) {
-            $this->subQuery->andWhere(Db::parseParam('reviews_reviews.email', $this->email));
+            $this->subQuery->innerJoin(['u' => CraftTable::USERS], '[[u.id]] = [[reviews_reviews.authorId]]');
+            $this->subQuery->andWhere(Db::parseParam('u.email', $this->email));
         }
 
         if ($this->moderationStatus) {
             $this->subQuery->andWhere(Db::parseParam('reviews_reviews.moderationStatus', $this->moderationStatus));
-        }
-
-        if ($this->fullName) {
-            $this->subQuery->andWhere(Db::parseParam('reviews_reviews.fullName', $this->fullName));
         }
 
         if ($this->submissionDate) {
@@ -227,8 +249,13 @@ class ReviewQuery extends ElementQuery
             }
         }
 
+        if ($this->subjectElementType) {
+            $this->subQuery->innerJoin(['e' => CraftTable::ELEMENTS], '[[e.id]] = [[reviews_reviews.elementId]]');
+            $this->subQuery->andWhere(Db::parseParam('e.type', $this->subjectElementType));
+        }
+
         if ($this->rating) {
-            $this->subQuery->andWhere(Db::parseParam('reviews_reviews.rating', $this->rating));
+            $this->subQuery->andWhere(Db::parseNumericParam('reviews_reviews.rating', $this->rating));
         }
 
         if ($this->review) {
@@ -236,11 +263,16 @@ class ReviewQuery extends ElementQuery
         }
 
         if ($this->typeId) {
-            $this->subQuery->andWhere(Db::parseParam('reviews_reviews.typeId', $this->typeId));
+            $this->subQuery->andWhere(Db::parseNumericParam('reviews_reviews.typeId', $this->typeId));
         }
 
-        if ($this->userId) {
-            $this->subQuery->andWhere(Db::parseParam('reviews_reviews.userId', $this->userId));
+        if ($this->authorId) {
+            $this->subQuery->andWhere(Db::parseNumericParam('reviews_reviews.authorId', $this->authorId));
+        }
+
+        if ($this->authorGroupId) {
+            $this->subQuery->innerJoin(['usergroups_users' => CraftTable::USERGROUPS_USERS], '[[usergroups_users.userId]] = [[reviews_reviews.authorId]]');
+            $this->subQuery->andWhere(Db::parseNumericParam('usergroups_users.groupId', $this->authorGroupId));
         }
 
         return parent::beforePrepare();
@@ -252,7 +284,7 @@ class ReviewQuery extends ElementQuery
     protected function statusCondition(string $status): mixed
     {
         $currentTimeDb = Db::prepareDateForDb(new DateTime());
-        
+
         return match ($status) {
             Review::STATUS_LIVE => [
                 'elements.enabled' => true,
@@ -270,5 +302,37 @@ class ReviewQuery extends ElementQuery
             ],
             default => parent::statusCondition($status),
         };
+    }
+
+    protected function parseModelHandle($value, string $model, string $table = null): array
+    {
+        $ids = [];
+        $handles = [];
+
+        $values = ArrayHelper::isTraversable($value) ? $value : [$value];
+
+        if ($glue = Db::extractGlue($values)) {
+            array_unshift($ids, $glue);
+        }
+
+        foreach ($values as $v) {
+            if ($v instanceof $model) {
+                $ids[] = $v->id ?? null;
+            } elseif (is_numeric($v)) {
+                $ids[] = $v;
+            } elseif (is_string($v)) {
+                $handles[] = $v;
+            }
+        }
+
+        if ($table && count($handles)) {
+            $ids = ArrayHelper::merge($ids, (new Query())
+                ->select('id')
+                ->from($table)
+                ->where(Db::parseParam('handle', $handles))
+                ->column());
+        }
+
+        return $ids;
     }
 }

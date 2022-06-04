@@ -2,13 +2,12 @@
 
 namespace rynpsc\reviews\console\controllers\utils;
 
-use rynpsc\reviews\db\Table;
-use rynpsc\reviews\elements\Review;
-
 use Craft;
 use craft\console\Controller;
 use craft\db\Query;
 use craft\helpers\Console;
+use rynpsc\reviews\db\Table;
+use rynpsc\reviews\elements\Review;
 use yii\console\ExitCode;
 
 /**

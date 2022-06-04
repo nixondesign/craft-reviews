@@ -2,29 +2,46 @@
 
 namespace rynpsc\reviews\elements;
 
-use rynpsc\reviews\Plugin;
-use rynpsc\reviews\db\Table;
-use rynpsc\reviews\elements\db\ReviewQuery;
-use rynpsc\reviews\enums\Permissions;
-use rynpsc\reviews\models\ReviewType;
-use rynpsc\reviews\records\Review as ReviewRecord;
-
 use Craft;
+use craft\helpers\ArrayHelper;
 use DateTime;
-use Exception;
+use RuntimeException;
 use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\db\Query;
 use craft\elements\User;
 use craft\elements\actions\CopyReferenceTag;
 use craft\elements\actions\Delete;
+use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\App;
 use craft\helpers\Cp;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\UrlHelper;
+use craft\models\FieldLayout;
+use craft\validators\DateTimeValidator;
+use craft\web\CpScreenResponseBehavior;
+use rynpsc\reviews\Plugin;
+use rynpsc\reviews\db\Table;
+use rynpsc\reviews\elements\conditions\ReviewCondition;
+use rynpsc\reviews\elements\db\ReviewQuery;
+use rynpsc\reviews\enums\Permissions;
+use rynpsc\reviews\models\ReviewType;
+use rynpsc\reviews\records\Review as ReviewRecord;
+use rynpsc\reviews\web\assets\ReviewsAsset;
 use yii\base\InvalidConfigException;
+use yii\web\Response;
 
+/**
+ * @property null|string|array|int $authorId
+ * @property-read string $elementDisplayName
+ * @property-read bool $isGuest
+ * @property-read ReviewType $type
+ * @property-read array $dirtyAttributes
+ * @property-read null|string $postEditUrl
+ * @property-read string[] $cacheTags
+ * @property-read null|ElementInterface $element
+ */
 class Review extends Element
 {
     public const STATUS_LIVE = 'live';
@@ -32,18 +49,17 @@ class Review extends Element
     public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';
 
-    public $submissionDate;
-    public $elementId;
-    public $rating;
-    public $review;
-    public $siteId;
-    public $typeId;
-    public $userId;
-    public $moderationStatus;
-    private $_email;
-    private $_fullName;
-    private $_user;
-    private $_guest;
+    public ?DateTime $submissionDate = null;
+    public ?int $elementId = null;
+    public ?int $rating = null;
+    public ?int $typeId = null;
+    public ?string $moderationStatus = null;
+    public ?string $review = null;
+
+    protected ?User $author = null;
+    protected ?int $_authorId = null;
+    protected ?string $email = null;
+    protected ?string $fullName = null;
 
     /**
      * @inheritdoc
@@ -90,7 +106,7 @@ class Review extends Element
      */
     public static function hasTitles(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -149,9 +165,40 @@ class Review extends Element
     /**
      * @inheritdoc
      */
+    public static function createCondition(): ElementConditionInterface
+    {
+        return Craft::createObject(ReviewCondition::class, [static::class]);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public static function find(): ElementQueryInterface
     {
         return new ReviewQuery(static::class);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false
+    {
+        if ($handle === 'author') {
+            $sourceElementIds = ArrayHelper::getColumn($sourceElements, 'id');
+
+            $map = (new Query())
+                ->select(['id as source', 'authorId as target'])
+                ->from(Table::REVIEWS)
+                ->where(['and', ['id' => $sourceElementIds], ['not', ['authorId' => null]]])
+                ->all();
+
+            return [
+                'map' => $map,
+                'elementType' => User::class,
+            ];
+        }
+
+        return parent::eagerLoadingMap($sourceElements, $handle);
     }
 
     /**
@@ -209,13 +256,10 @@ class Review extends Element
     protected static function defineTableAttributes(): array
     {
         return [
-            'review' => Craft::t('reviews', 'Review'),
-            'submissionDate' => Craft::t('reviews', 'Date'),
+            'author' => Craft::t('reviews', 'Author'),
             'elementId' => Craft::t('reviews', 'Element'),
-            'email' => Craft::t('reviews', 'Email'),
-            'fullName' => Craft::t('reviews', 'Name'),
             'rating' => Craft::t('reviews', 'Rating'),
-            'user' => Craft::t('reviews', 'User'),
+            'submissionDate' => Craft::t('reviews', 'Date'),
         ];
     }
 
@@ -225,10 +269,10 @@ class Review extends Element
     protected static function defineDefaultTableAttributes(string $source): array
     {
         return [
-            'review',
-            'submissionDate',
             'rating',
             'elementId',
+            'authorId',
+            'submissionDate',
         ];
     }
 
@@ -272,19 +316,6 @@ class Review extends Element
         ];
     }
 
-    public static function getReviewElementTitleHtml(&$context)
-    {
-        if (!isset($context['element'])) {
-            return null;
-        }
-
-        if (get_class($context['element']) === static::class) {
-            return Craft::$app->getView()->renderTemplate('reviews/elements/table-attributes/title', [
-                'review' => $context['element'],
-            ]);
-        }
-    }
-
     public static function getHighestReviewTypeRating()
     {
         return (new Query())
@@ -298,39 +329,25 @@ class Review extends Element
     /**
      * @inheritdoc
      */
-    public function init(): void
+    protected function cpEditUrl(): ?string
     {
-        $this->typeId = (int)$this->typeId;
-        $this->userId = (int)$this->userId;
-        $this->elementId = (int)$this->elementId;
-        $this->rating = (int)$this->rating;
+        $type = $this->getType();
 
-        parent::init();
-    }
+        $path = sprintf('reviews/%s/%s', $type->handle, $this->getCanonicalId());
 
-    /**
-     * @inheritdoc
-     */
-    public function datetimeAttributes(): array
-    {
-        $attributes = parent::datetimeAttributes();
-        $attributes[] = 'submissionDate';
-
-        return $attributes;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getCpEditUrl(): string
-    {
-        $url = UrlHelper::cpUrl('reviews/' . $this->id);
-
-        if (Craft::$app->getIsMultiSite()) {
-            $url .= '?site=' . $this->getSite()->handle;
+        if ($this->slug && !str_starts_with($this->slug, '__')) {
+            $path .= "-$this->slug";
         }
 
-        return $url;
+        return UrlHelper::cpUrl($path);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getPostEditUrl(): ?string
+    {
+        return UrlHelper::cpUrl('reviews');
     }
 
     /**
@@ -338,7 +355,6 @@ class Review extends Element
      */
     public function getSupportedSites(): array
     {
-
         return [$this->siteId ?: Craft::$app->getSites()->getPrimarySite()->id];
     }
 
@@ -353,7 +369,19 @@ class Review extends Element
             $this->submissionDate->setTimestamp($timestamp - $timestamp % 60);
         }
 
+        $this->moderationStatus ??= $this->getType()->defaultStatus;
+
         return parent::beforeValidate();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function beforeSave(bool $isNew): bool
+    {
+        $this->updateTitle();
+
+        return parent::beforeSave($isNew);
     }
 
     /**
@@ -365,41 +393,33 @@ class Review extends Element
             $record = ReviewRecord::findOne([$this->id]);
 
             if (!$record) {
-                throw new Exception('Invalid record ID: ' . $this->id);
+                throw new RuntimeException('Invalid record ID: ' . $this->id);
             }
         } else {
             $record = new ReviewRecord();
             $record->id = (int)$this->id;
-
-            $this->moderationStatus = $this->getType()->defaultStatus;
+            $record->elementId = $this->elementId;
+            $record->typeId = $this->typeId;
+            $record->siteId ??= Craft::$app->getSites()->getCurrentSite()->id;
         }
 
-        if ($this->userId) {
-            $record->userId = $this->userId;
-        } else if ($this->email) {
-            $user = User::find()->email($this->email)->one();
-
-            if ($user) {
-                $record->userId = $user->id;
-            } else {
-                $record->email = $this->email;
-                $record->fullName = $this->_fullName;
-            }
+        if ($this->getEmail()) {
+            $user = $this->ensureUser();
+        } else {
+            $user = null;
         }
 
-        if ($this->siteId === null) {
-            $this->siteId = Craft::$app->getSites()->getCurrentSite()->id;
-        }
-
-        $record->elementId = $this->elementId;
-        $record->moderationStatus = $this->moderationStatus;
-        $record->submissionDate = $this->submissionDate;
         $record->rating = $this->rating;
         $record->review = $this->review;
-        $record->siteId = $this->siteId;
-        $record->typeId = $this->typeId;
+        $record->authorId = $user?->id ?? null;
+        $record->submissionDate = $this->submissionDate;
+        $record->moderationStatus = $this->moderationStatus;
+
+        $dirtyAttributes = array_keys($record->getDirtyAttributes());
 
         $record->save(false);
+
+        $this->setDirtyAttributes($dirtyAttributes);
 
         parent::afterSave($isNew);
     }
@@ -440,7 +460,7 @@ class Review extends Element
     /**
      * @inheritdoc
      */
-    public function getFieldLayout()
+    public function getFieldLayout(): FieldLayout|null
     {
         return $this->getType()->getFieldLayout();
     }
@@ -448,31 +468,134 @@ class Review extends Element
     /**
      * @inheritdoc
      */
-    public function getIsEditable(): bool
+    public static function trackChanges(): bool
     {
-        $type = $this->getType();
-        $user = Craft::$app->getUser();
-
-        if (!$user->checkPermission(Permissions::VIEW_REVIEWS . ':' . $type->uid)) {
-            return false;
-        }
-
         return true;
     }
 
     /**
      * @inheritdoc
      */
-    public function getIsDeletable(): bool
+    public function canView(User $user): bool
     {
-        $type = $this->getType();
-        $user = Craft::$app->getUser();
-
-        if (!$user->checkPermission(Permissions::DELETE_REVIEWS . ':' . $type->uid)) {
-            return false;
+        if (parent::canView($user)) {
+            return true;
         }
 
+        $type = $this->getType();
+
+        if ($this->_authorId !== $user->id) {
+            $user->can($type->getPermissionKey(Permissions::VIEW_PEER_REVIEWS));
+        }
+
+        return $user->can($type->getPermissionKey(Permissions::VIEW_REVIEWS));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function canSave(User $user): bool
+    {
+        if (parent::canSave($user)) {
+            return true;
+        }
+
+        $type = $this->getType();
+
+        if ($this->_authorId !== $user->id) {
+            $user->can($type->getPermissionKey(Permissions::SAVE_PEER_REVIEWS));
+        }
+
+        return $user->can($type->getPermissionKey(Permissions::SAVE_REVIEWS));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function canDuplicate(User $user): bool
+    {
         return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function canCreateDrafts(User $user): bool
+    {
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function canDelete(User $user): bool
+    {
+        if (parent::canDelete($user)) {
+            return true;
+        }
+
+        $type = $this->getType();
+
+        if ($this->_authorId !== $user->id) {
+            $user->can($type->getPermissionKey(Permissions::DELETE_PEER_REVIEWS));
+        }
+
+        return $user->can($type->getPermissionKey(Permissions::DELETE_REVIEWS));
+    }
+
+    /**
+     * @inerhitdoc
+     */
+    public function metadata(): array
+    {
+        return [
+            Craft::t('reviews', $this->getElementDisplayName()) => function() {
+                return $this->element;
+            },
+
+            Craft::t('reviews', 'Author') => function() {
+                if ($this->_authorId === null) {
+                    return '';
+                }
+
+                $author = $this->getAuthor();
+
+                if ($author === null) {
+                    return Craft::t('reviews', 'Deleted User');
+                }
+
+                return $author;
+            }
+        ];
+    }
+
+    /**
+     * @inerhitdoc
+     */
+    public function getCacheTags(): array
+    {
+        return [
+            "reviewType:$this->typeId",
+        ];
+    }
+
+    /**
+     * @inerhitdoc
+     */
+    public function prepareEditScreen(Response $response, string $containerId): void
+    {
+        Craft::$app->getView()->registerAssetBundle(ReviewsAsset::class);
+
+        $crumbs = [
+            [
+                'url' => UrlHelper::cpUrl('reviews'),
+                'label' => Craft::t('reviews', 'Reviews'),
+            ],
+        ];
+
+        /** @var Response|CpScreenResponseBehavior $response */
+        $response->crumbs($crumbs);
+        $response->selectedSubnavItem = 'reviews';
     }
 
     public function getElement(): ?ElementInterface
@@ -500,64 +623,64 @@ class Review extends Element
         return $class::displayName();
     }
 
-    public function isGuest(): bool
+    public function setAuthorId(array|int|string|null $_authorId): void
     {
-        return $this->getUser() === null;
-    }
-
-    public function getEmail(): ?string
-    {
-        $user = $this->getUser();
-
-        if ($user === null) {
-            return $this->_email;
+        if ($_authorId === '') {
+            $_authorId = null;
         }
 
-        return $user->email;
+        if (is_array($_authorId)) {
+            $this->_authorId = reset($_authorId) ?: null;
+        } else {
+            $this->_authorId = $_authorId;
+        }
+
+        $this->author = null;
+        $this->email = null;
+        $this->fullName = null;
+    }
+
+    public function getAuthorId(): ?int
+    {
+        return $this->_authorId;
     }
 
     public function setEmail($value): void
     {
-        $this->_email = $value;
-    }
-
-    public function getFullName(): ?string
-    {
-        $user = $this->getUser();
-
-        if ($user === null) {
-            return $this->_fullName;
-        }
-
-        return $user->getFriendlyName();
+        $this->email = $value;
     }
 
     public function setFullName($value): void
     {
-        $this->_fullName = $value;
+        $this->fullName = $value;
     }
 
-    public function getUser(): ?User
+    public function getEmail(): ?string
     {
-        if ($this->_user) {
-            return $this->_user;
+        return $this->getAuthor()?->email ?? $this->email;
+    }
+
+    public function getFullName(): ?string
+    {
+        return $this->getAuthor()?->fullName ?? $this->fullName;
+    }
+
+    public function getIsGuest(): bool
+    {
+        return $this->getAuthor()?->id === null;
+    }
+
+    public function getAuthor(): ?User
+    {
+        if ($this->author) {
+            return $this->author;
         }
 
-        if ($this->_guest === true) {
+        if ($this->_authorId === null) {
             return null;
         }
 
-        if ($this->userId === null) {
-            $this->_guest = true;
-            return null;
-        }
-
-        if (($this->_user = Craft::$app->getUsers()->getUserById($this->userId)) === null) {
-            $this->_user = null;
-            $this->_guest = true;
-        }
-
-        return $this->_user;
+        return $this->author = Craft::$app->getUsers()->getUserById($this->_authorId);
     }
 
     public function getType(): ReviewType
@@ -566,7 +689,7 @@ class Review extends Element
             throw new InvalidConfigException('Review is missing its review type ID');
         }
 
-        $reviewType = Plugin::getInstance()->getReviewTypes()->getReviewTypeById($this->typeId);
+        $reviewType = Plugin::getInstance()->getReviewTypes()->getTypeById($this->typeId);
 
         if ($reviewType === null) {
             throw new InvalidConfigException('Invalid review type ID: ' . $this->typeId);
@@ -575,7 +698,54 @@ class Review extends Element
         return $reviewType;
     }
 
-    public function elementValidator($attribute, $params, $validator)
+    public function ensureUser(): User
+    {
+        $query = User::find()->status(null);
+
+        $user = $query->email($this->getEmail())->one();
+
+        if ($user) {
+            return $user;
+        }
+
+        $user = new User();
+        $user->email = $this->getEmail();
+        $user->fullName = $this->getFullName();
+
+        Craft::$app->getElements()->saveElement($user, false);
+
+        return $user;
+    }
+
+    public function updateTitle(): void
+    {
+        $reviewType = $this->getType();
+
+        if ($reviewType->hasTitleField) {
+            return;
+        }
+
+        $language = Craft::$app->language;
+
+        Craft::$app->getLocale();
+        Craft::$app->language = $this->getSite()->language;
+
+        $title = Craft::$app->getView()->renderObjectTemplate($reviewType->titleFormat, $this);
+
+        if ($title !== '') {
+            $this->title = $title;
+        }
+
+        Craft::$app->language = $language;
+    }
+
+    /**
+     * @param $attribute
+     * @param $params
+     * @param $validator
+     * @return void
+     */
+    public function elementValidator($attribute, $params, $validator): void
     {
         if ($this->id !== null) {
             return;
@@ -588,25 +758,34 @@ class Review extends Element
         }
     }
 
+    /**
+     * @param $attribute
+     * @return void
+     */
     public function uniqueUserValidator($attribute): void
     {
-        $query = self::find()
-            ->status(null)
-            ->elementId($this->elementId);
+        $email = $this->getEmail();
 
-        if ($this->userId) {
-            $query->userId($this->userId);
-        } else {
-            $query->email($this->getEmail());
-        }
-
-        $review = $query->one();
-
-        if ($review === null || $review->id === $this->id) {
+        if ($email === null) {
             return;
         }
 
-        $this->addError($attribute, Craft::t('reviews', 'Review already submitted for this {element}, you cannot leave another.', [
+        $query = self::find()
+            ->status(null)
+            ->email($email)
+            ->drafts(null)
+            ->draftOf(false)
+            ->id(['not', $this->getCanonicalId()])
+            ->elementId($this->elementId);
+
+        /** @var Review|null $review */
+        $review = $query->one();
+
+        if ($review === null) {
+            return;
+        }
+
+        $this->addError($attribute, Craft::t('reviews', 'Review already submitted for this {element}.', [
             'element' => $this->getElementDisplayName(),
         ]));
     }
@@ -616,25 +795,85 @@ class Review extends Element
      */
     protected function defineRules(): array
     {
+        $maxRating = $this->getType()->maxRating;
+
         $rules = parent::defineRules();
 
-        $rules[] = ['review', 'required'];
-        $rules[] = [['typeId'], 'number', 'integerOnly' => true];
+        $scenarios = [self::SCENARIO_DEFAULT, self::SCENARIO_LIVE];
+
+        $rules[] = [['review'], 'required', 'on' => $scenarios];
+        $rules[] = [['rating'], 'required', 'on' => $scenarios];
+        $rules[] = [['rating'], 'number', 'min' => 1, 'max' => $maxRating, 'on' => $scenarios];
+        $rules[] = [['typeId'], 'number', 'integerOnly' => true, 'on' => $scenarios];
         $rules[] = [['email'], 'email', 'enableIDN' => App::supportsIdn(), 'enableLocalIDN' => false];
-        $rules[] = [['rating'], 'required'];
+        $rules[] = [['submissionDate'], DateTimeValidator::class];
+        $rules[] = [['moderationStatus'], 'required'];
+        $rules[] = [['moderationStatus'], 'in', 'range' => array_keys(self::moderationStatuses())];
 
-        $rules[] = ['elementId', 'elementValidator'];
-        $rules[] = [['rating'], 'uniqueUserValidator'];
+        $rules[] = [['elementId'], 'elementValidator'];
+        $rules[] = [['email', 'authorId'], 'uniqueUserValidator', 'on' => $scenarios];
+        $rules[] = [['authorId', 'typeId'], 'number', 'integerOnly' => true, 'on' => $scenarios];
 
-        $rules[] = [['email'], 'required', 'when' => function () {
-            return $this->getType()->requireGuestEmail;
+        $isCp = Craft::$app->getRequest()->isCpRequest;
+
+        $rules[] = [['email'], 'required', 'when' => function () use ($isCp) {
+            return !$isCp && $this->getIsGuest();
         }];
 
-        $rules[] = [['fullName'], 'required', 'when' => function () {
-            return $this->getType()->requireGuestName;
+        $rules[] = [['fullName'], 'required', 'when' => function () use ($isCp) {
+            return !$isCp && $this->getType()->requireFullName && $this->getIsGuest();
         }];
 
         return $rules;
+    }
+
+    /**
+     * @inerhitdoc
+     */
+    protected function metaFieldsHtml(bool $static): string
+    {
+        $fields = [];
+
+        $fields[] = Cp::selectFieldHtml([
+            'label' => Craft::t('reviews', 'Status'),
+            'id' => 'moderationStatus',
+            'name' => 'moderationStatus',
+            'value' => $this->moderationStatus,
+            'errors' => $this->getErrors('moderationStatus'),
+            'disabled' => $static,
+            'options' => self::moderationStatuses(),
+        ]);
+
+        $fields[] = Cp::dateTimeFieldHtml([
+            'label' => Craft::t('reviews', 'Date'),
+            'id' => 'submissionDate',
+            'name' => 'submissionDate',
+            'value' => $this->submissionDate,
+            'errors' => $this->getErrors('submissionDate'),
+            'disabled' => $static,
+        ]);
+
+        $author = $this->getAuthor();
+
+        if ($author->id === null) {
+            $author = null;
+        }
+
+        $fields[] = Cp::elementSelectFieldHtml([
+            'label' => Craft::t('reviews', 'Author'),
+            'id' => 'authorId',
+            'name' => 'authorId',
+            'elementType' => User::class,
+            'selectionLabel' => Craft::t('app', 'Choose'),
+            'limit' => 1,
+            'errors' => $this->getErrors('authorId'),
+            'elements' => [$author],
+            'disabled' => $static,
+        ]);
+
+        $fields[] = parent::metaFieldsHtml($static);
+
+        return implode("\n", $fields);
     }
 
     /**
@@ -642,29 +881,46 @@ class Review extends Element
      */
     protected function tableAttributeHtml(string $attribute): string
     {
+        Craft::$app->getView()->registerAssetBundle(ReviewsAsset::class);
+
         switch ($attribute) {
             case 'rating':
                 return Craft::$app->getView()->renderTemplate('reviews/elements/table-attributes/rating', [
                     'review' => $this,
                 ]);
-
             case 'elementId':
                 if (!$element = $this->getElement()) {
-                    return Craft::t('reviews', 'Deleted');
+                    return Craft::t('reviews', 'Deleted Element');
                 }
 
                 return Cp::elementHtml($element);
-
-            case 'user':
-                if (!$user = $this->getUser()) {
-                    return Craft::t('reviews', 'Guest');
+            case 'author':
+                if ($this->_authorId === null) {
+                    return '';
                 }
 
-                return Cp::elementHtml($user);
+                $author = $this->getAuthor();
 
+                if ($author === null) {
+                    return Craft::t('reviews', 'Deleted User');
+                }
+
+                return Cp::elementHtml($author);
             default:
         }
 
         return parent::tableAttributeHtml($attribute);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function uiLabel(): ?string
+    {
+        if (!isset($this->title) || trim($this->title) === '') {
+            return Craft::t('reviews', 'Untitled review');
+        }
+
+        return null;
     }
 }

@@ -44,25 +44,12 @@
 
 .rynpsc-reviews-star-input input:checked ~ label svg {
 	fill: #e7eef3;
-	/*stroke: #e7eef3;*/
 }
 
 .rynpsc-reviews-star-input input + label svg,
 .rynpsc-reviews-star-input input:checked + label svg {
-	fill: #f1c40e;
+	fill: #f7c948;
 	stroke: none;
-}
-
-.rynpsc-reviews-element {
-    position: relative;
-	display: block;
-	padding-left: 22px;
-}
-
-.rynpsc-reviews-element-status {
-    position: absolute;
-    top: 0;
-    left: 5px;
 }
 
 .rynpsc-reviews-element-rating {
@@ -73,7 +60,6 @@
 .rynpsc-reviews-element-review {
     max-width: 560px;
     font-weight: 400;
-
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
@@ -81,12 +67,9 @@
 }
 
 .rynpsc-reviews-stars {
+	gap: 1px;
     display: flex;
     white-space: nowrap;
-}
-
-.element[data-type="rynpsc\\reviews\\elements\\Review"] {
-	display: none !important;
 }
 
 .rynpsc-reviews-star-empty {
@@ -94,5 +77,11 @@
 }
 
 .rynpsc-reviews-star-filled {
-    fill: #f1c40e;
+    fill: #f7c948;
 }
+
+[data-type="rynpsc\\reviews\\elements\\Review"].element.small.hasstatus .status {
+	top: 12px;
+	left: 2px;
+}
+

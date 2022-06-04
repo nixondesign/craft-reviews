@@ -5,41 +5,46 @@ namespace rynpsc\reviews\services;
 use rynpsc\reviews\db\Table;
 use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\enums\Permissions;
+use rynpsc\reviews\enums\ProjectConfig;
 use rynpsc\reviews\models\ReviewType;
 use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
 
 use Craft;
 use Throwable;
 use craft\base\Component;
+use craft\base\MemoizableArray;
 use craft\db\Query;
 use craft\events\ConfigEvent;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Db;
 use craft\helpers\ProjectConfig as ProjectConfigHelper;
+use craft\helpers\Queue;
 use craft\helpers\StringHelper;
 use craft\models\FieldLayout;
+use craft\queue\jobs\ResaveElements;
 
 class ReviewTypes extends Component
 {
-    public const PROJECT_CONFIG_REVIEW_TYPES_KEY = 'reviews.reviewTypes';
+    private ?MemoizableArray $types = null;
 
-    public function getAllReviewTypes(): array
+    private function types()
     {
-        $results = (new Query())
-            ->select('*')
-            ->from(Table::REVIEWTYPES)
-            ->all();
+        if (isset($this->types)) {
+            return $this->types;
+        }
 
         $types = [];
 
-        foreach ($results as $result) {
-            $model = new ReviewType();
-            $model->setAttributes($result, false);
-
-            $types[] = $model;
+        foreach ($this->createTypeQuery()->all() as $result) {
+            $types[] = new ReviewType($result);
         }
 
-        return $types;
+        return $this->types = new MemoizableArray($types);
+    }
+
+    public function getAllReviewTypes(): array
+    {
+        return $this->types()->all();
     }
 
     public function getEditableReviewTypes(): array
@@ -60,91 +65,42 @@ class ReviewTypes extends Component
         return count($this->getEditableReviewTypes());
     }
 
-    public function getReviewTypeByHandle(string $handle): ?ReviewType
+    public function getTypeByHandle(string $handle): ?ReviewType
     {
-        $query = (new Query())
-            ->from(Table::REVIEWTYPES)
-            ->where(['handle' => $handle])
-            ->one();
-
-        if ($query === null) {
-            return null;
-        }
-
-        $model = new ReviewType();
-        $model->setAttributes($query);
-
-        return $model;
+        return $this->types()->firstWhere('handle', $handle, true);
     }
 
-    public function getReviewTypeById(int $id): ?ReviewType
+    public function getTypeById(int $id): ?ReviewType
     {
-        $result = (new Query())
-            ->from(Table::REVIEWTYPES)
-            ->where(['id' => $id])
-            ->one();
+        return $this->types()->firstWhere('id', $id, true);
+    }
 
-        if ($result === null) {
-            return null;
-        }
-
-        $model = new ReviewType();
-        $model->setAttributes($result, false);
-
-        return $model;
+    public function getTypeByUid(string $uid)
+    {
+        return $this->types()->firstWhere('uid', $uid, true);
     }
 
     public function saveReviewType(ReviewType $reviewType, bool $runValidation = true): bool
     {
-        $isNew = ($reviewType->id === null);
+        $isNew = !$reviewType->id;
 
         if ($runValidation && !$reviewType->validate()) {
+            Craft::info('Review type not saved due to validation error.', __METHOD__);
+
             return false;
         }
 
         if ($isNew) {
             $reviewType->uid = StringHelper::UUID();
-        } elseif (!$reviewType->uid) {
-            $reviewTypeRecord = ReviewTypeRecord::findOne(['id' => $reviewType->id]);
-
-            if ($reviewTypeRecord === null) {
-                throw new \Exception("No review type exists with the ID '{$reviewType->id}'");
-            }
-
-            $reviewType->uid = $reviewTypeRecord->uid;
         }
 
-        $projectConfig = Craft::$app->getProjectConfig();
+        $configPath = ProjectConfig::PATH_REVIEW_TYPES . '.' . $reviewType->uid;
 
-        $projectConfigData = [
-            'name' => $reviewType->name,
-            'handle' => $reviewType->handle,
-            'maxRating' => $reviewType->maxRating,
-            'allowGuestReviews' => $reviewType->allowGuestReviews,
-            'requireGuestEmail' => $reviewType->requireGuestEmail,
-            'requireGuestName' => $reviewType->requireGuestName,
-            'defaultStatus' => $reviewType->defaultStatus,
-        ];
-
-        // ---
-        $fieldLayout = $reviewType->getFieldLayout();
-        $fieldLayoutConfig = $fieldLayout->getConfig();
-
-        if ($fieldLayoutConfig) {
-            if (!$fieldLayout->id) {
-                $layoutUid = $fieldLayout->uid = StringHelper::UUID();
-            } else {
-                $layoutUid = Db::uidById(\craft\db\Table::FIELDLAYOUTS, $fieldLayout->id);
-            }
-
-            $projectConfigData['fieldLayouts'] = [
-                $layoutUid => $fieldLayoutConfig,
-            ];
-        }
-        // ---
-
-        $projectConfigPath = self::PROJECT_CONFIG_REVIEW_TYPES_KEY . ".{$reviewType->uid}";
-        $projectConfig->set($projectConfigPath, $projectConfigData);
+        Craft::$app->getProjectConfig()->set(
+            $configPath,
+            $reviewType->getConfig(),
+            "Save review type “{$reviewType->handle}”"
+        );
 
         if ($isNew) {
             $reviewType->id = Db::idByUid(Table::REVIEWTYPES, $reviewType->uid);
@@ -155,10 +111,25 @@ class ReviewTypes extends Component
 
     public function deleteReviewTypeById(int $id): bool
     {
-        $reviewType = $this->getReviewTypeById($id);
-        $projectConfigPath = self::PROJECT_CONFIG_REVIEW_TYPES_KEY . ".{$reviewType->uid}";
+        if (!$id) {
+            return false;
+        }
 
-        Craft::$app->getProjectConfig()->remove($projectConfigPath);
+        $reviewType = $this->getTypeById($id);
+
+        if (!$reviewType) {
+            return false;
+        }
+
+        return $this->deleteReviewType($reviewType);
+    }
+
+    public function deleteReviewType(ReviewType $reviewType): bool
+    {
+        Craft::$app->getProjectConfig()->remove(
+            ProjectConfig::PATH_REVIEW_TYPES . '.' . $reviewType->uid,
+            "Delete review type “{$reviewType->handle}”"
+        );
 
         return true;
     }
@@ -171,85 +142,124 @@ class ReviewTypes extends Component
         ProjectConfigHelper::ensureAllSitesProcessed();
         ProjectConfigHelper::ensureAllFieldsProcessed();
 
-        $db = Craft::$app->getDb();
-        $transaction = $db->beginTransaction();
-
-        $data = $event->newValue;
+        $transaction = Craft::$app->getDb()->beginTransaction();
 
         try {
-            $reviewTypeRecord = $this->getReviewTypeRecordByUid($uid);
+            $data = $event->newValue;
+
+            $reviewTypeRecord = $this->getReviewTypeRecordByUid($uid) ?? new ReviewTypeRecord();
 
             $reviewTypeRecord->uid = $uid;
-            $reviewTypeRecord->name = $data['name'];
-            $reviewTypeRecord->handle = $data['handle'];
-            $reviewTypeRecord->maxRating = $data['maxRating'];
-            $reviewTypeRecord->allowGuestReviews = $data['allowGuestReviews'];
-            $reviewTypeRecord->requireGuestEmail = $data['requireGuestEmail'];
-            $reviewTypeRecord->requireGuestName = $data['requireGuestName'];
-            $reviewTypeRecord->defaultStatus = $data['defaultStatus'];
+            $reviewTypeRecord->setAttributes($data, false);
 
             $fieldsService = Craft::$app->getFields();
 
-            if (!empty($data['fieldLayouts']) && !empty($config = reset($data['fieldLayouts']))) {
-                $layout = FieldLayout::createFromConfig($config);
+            if (!empty($data['fieldLayouts'])) {
+                $layout = FieldLayout::createFromConfig(reset($data['fieldLayouts']));
                 $layout->id = $reviewTypeRecord->fieldLayoutId;
                 $layout->type = Review::class;
                 $layout->uid = key($data['fieldLayouts']);
-                $fieldsService->saveLayout($layout);
+                $fieldsService->saveLayout($layout, false);
                 $reviewTypeRecord->fieldLayoutId = $layout->id;
-            } else if ($reviewTypeRecord->fieldLayoutId) {
+            } elseif ($reviewTypeRecord->fieldLayoutId) {
                 $fieldsService->deleteLayoutById($reviewTypeRecord->fieldLayoutId);
                 $reviewTypeRecord->fieldLayoutId = null;
             }
 
+            $resaveRequired = (
+                $reviewTypeRecord->titleFormat !== $reviewTypeRecord->getOldAttribute('titleFormat') ||
+                $reviewTypeRecord->hasTitleField !== $reviewTypeRecord->getOldAttribute('hasTitleField') ||
+                $reviewTypeRecord->fieldLayoutId !== $reviewTypeRecord->getOldAttribute('fieldLayoutId')
+            );
+
             $reviewTypeRecord->save(false);
+
             $transaction->commit();
         } catch (Throwable $exception) {
             $transaction->rollBack();
             throw $exception;
         }
+
+        if ($resaveRequired) {
+            $this->resaveReviewsByTypeId($reviewTypeRecord->id);
+        }
+
+        $this->types = null;
+        Craft::$app->getElements()->invalidateCachesForElementType(Review::class);
     }
 
     public function handleDeletedReviewType(ConfigEvent $event): void
     {
         $uid = $event->tokenMatches[0];
-
-        $db = Craft::$app->getDb();
-        $transaction = $db->beginTransaction();
         $reviewTypeRecord = $this->getReviewTypeRecordByUid($uid);
 
-        if ($reviewTypeRecord->id === null) {
+        if ($reviewTypeRecord === null) {
             return;
         }
 
-        try {
-            $reviews = Review::find()
-                ->anyStatus()
-                ->typeId($reviewTypeRecord->id)
-                ->limit(null)
-                ->all();
+        $transaction = Craft::$app->getDb()->beginTransaction();
 
-            foreach ($reviews as $review) {
-                Craft::$app->getElements()->deleteElement($review);
+        try {
+            $reviewQuery = Review::find()
+                ->limit(null)
+                ->status(null)
+                ->typeId($reviewTypeRecord->id);
+
+            $elementsService = Craft::$app->getElements();
+
+            foreach (Craft::$app->getSites()->getAllSiteIds() as $siteId) {
+                foreach (Db::each($reviewQuery->siteId($siteId)) as $review) {
+                    /** @var Review $review */
+                    $elementsService->deleteElement($review);
+                }
             }
 
-            $reviewTypeRecord->delete();
+            if ($reviewTypeRecord->fieldLayoutId) {
+                Craft::$app->getFields()->deleteFieldById($reviewTypeRecord->fieldLayoutId);
+            }
+
+            Craft::$app->getDb()->createCommand()
+                ->delete(Table::REVIEWTYPES, ['id' => $reviewTypeRecord->id])
+                ->execute();
+
             $transaction->commit();
         } catch (Throwable $exception) {
             $transaction->rollBack();
 
             throw $exception;
         }
+
+        Craft::$app->getElements()->invalidateCachesForElementType(Review::class);
     }
 
-    private function getReviewTypeRecordByUid(string $uid): ReviewTypeRecord
+    private function resaveReviewsByTypeId(int $id): void
+    {
+        $type = $this->getTypeById($id);
+
+        $description = Craft::t('reviews', 'Resaving {type} reviews', [
+            'type' => $type->name,
+        ]);
+
+        Queue::push(new ResaveElements([
+            'description' => $description,
+            'elementType' => Review::class,
+            'criteria' => [
+                'typeId' => $id,
+                'siteId' => '*',
+                'status' => null,
+            ],
+        ]));
+    }
+
+    private function getReviewTypeRecordByUid(string $uid): ?ReviewTypeRecord
     {
         $reviewType = ReviewTypeRecord::findOne(['uid' => $uid]);
 
-        if ($reviewType) {
-            return $reviewType;
-        }
+        return $reviewType ?? null;
+    }
 
-        return new ReviewTypeRecord();
+    private function createTypeQuery()
+    {
+        return (new Query())->select('*')->from(Table::REVIEWTYPES);
     }
 }

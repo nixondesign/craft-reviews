@@ -2,25 +2,25 @@
 
 namespace rynpsc\reviews\migrations;
 
+use Craft;
+use craft\db\Migration;
+use craft\db\Table as CraftTable;
+use craft\helpers\Db;
+use craft\records\FieldLayout;
 use rynpsc\reviews\Plugin;
 use rynpsc\reviews\db\Table;
 use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\models\ReviewType;
-
-use Craft;
-use craft\db\Migration;
-use craft\db\Table as CraftTable;
-use craft\helpers\MigrationHelper;
-use craft\records\FieldLayout;
 
 class Install extends Migration
 {
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): bool
     {
         $this->createTables();
+        $this->createIndexes();
         $this->addForeignKeys();
         $this->insertDefaultData();
 
@@ -30,51 +30,52 @@ class Install extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): bool
     {
         $this->dropForeignKeys();
         $this->dropTables();
+        $this->dropProjectConfig();
+
+        $this->delete(CraftTable::FIELDLAYOUTS, ['type' => Review::class]);
 
         return true;
     }
 
     public function createTables(): void
     {
-        if (!$this->db->tableExists(Table::REVIEWS)) {
-            $this->createTable(Table::REVIEWS, [
-                'id' => $this->primaryKey(),
-                'elementId' => $this->integer(),
-                'siteId' => $this->integer(),
-                'typeId' => $this->integer(),
-                'userId' => $this->integer(),
-                'moderationStatus' => $this->string(),
-                'review' => $this->text(),
-                'fullName' => $this->text(),
-                'email' => $this->text(),
-                'rating' => $this->integer(),
-                'submissionDate' => $this->dateTime(),
-                'dateCreated' => $this->dateTime()->notNull(),
-                'dateUpdated' => $this->dateTime()->notNull(),
-                'uid' => $this->uid(),
-            ]);
-        }
+        $this->archiveTableIfExists(Table::REVIEWS);
+        $this->archiveTableIfExists(Table::REVIEWTYPES);
 
-        if (!$this->db->tableExists(Table::REVIEWTYPES)) {
-            $this->createTable(Table::REVIEWTYPES, [
-                'id' => $this->primaryKey(),
-                'name' => $this->string()->notNull(),
-                'handle' => $this->string()->notNull(),
-                'maxRating' => $this->integer()->notNull(),
-                'defaultStatus' => $this->string(),
-                'allowGuestReviews' => $this->boolean(),
-                'requireGuestEmail' => $this->boolean(),
-                'requireGuestName' => $this->boolean(),
-                'fieldLayoutId' => $this->integer(),
-                'dateCreated' => $this->dateTime()->notNull(),
-                'dateUpdated' => $this->dateTime()->notNull(),
-                'uid' => $this->uid(),
-            ]);
-        }
+        $this->createTable(Table::REVIEWS, [
+            'id' => $this->primaryKey(),
+            'elementId' => $this->integer(),
+            'siteId' => $this->integer(),
+            'typeId' => $this->integer(),
+            'authorId' => $this->integer(),
+            'moderationStatus' => $this->text(),
+            'review' => $this->text(),
+            'rating' => $this->integer(),
+            'submissionDate' => $this->dateTime(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+
+        $this->createTable(Table::REVIEWTYPES, [
+            'id' => $this->primaryKey(),
+            'name' => $this->string()->notNull(),
+            'handle' => $this->string()->notNull(),
+            'maxRating' => $this->integer()->notNull(),
+            'defaultStatus' => $this->string(),
+            'allowGuestReviews' => $this->boolean(),
+            'requireFullName' => $this->boolean(),
+            'hasTitleField' => $this->boolean(),
+            'titleFormat' => $this->string(),
+            'fieldLayoutId' => $this->integer(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
     }
 
     public function dropTables(): void
@@ -85,14 +86,34 @@ class Install extends Migration
 
     public function addForeignKeys(): void
     {
-        $this->addForeignKey(null, Table::REVIEWS, 'id', CraftTable::ELEMENTS, 'id', 'CASCADE', null);
+        $this->addForeignKey(null, Table::REVIEWS, 'id', CraftTable::ELEMENTS, 'id', 'CASCADE');
         $this->addForeignKey(null, Table::REVIEWS, 'siteId', CraftTable::SITES, 'id', 'CASCADE', 'CASCADE');
-        $this->addForeignKey(null, Table::REVIEWS, 'userId', CraftTable::USERS, 'id', 'SET NULL', null);
+        $this->addForeignKey(null, Table::REVIEWS, 'authorId', CraftTable::USERS, 'id', 'SET NULL');
     }
 
     public function dropForeignKeys(): void
     {
-        MigrationHelper::dropAllForeignKeysOnTable(Table::REVIEWS, $this);
+        Db::dropAllForeignKeysToTable(Table::REVIEWS);
+        Db::dropForeignKeyIfExists(Table::REVIEWS, 'id');
+        Db::dropForeignKeyIfExists(Table::REVIEWS, 'siteId');
+        Db::dropForeignKeyIfExists(Table::REVIEWS, 'authorId');
+    }
+
+    public function createIndexes(): void
+    {
+        $this->createIndex(null, Table::REVIEWS, 'siteId');
+        $this->createIndex(null, Table::REVIEWS, 'rating');
+        $this->createIndex(null, Table::REVIEWS, 'authorId');
+        $this->createIndex(null, Table::REVIEWS, 'elementId');
+        $this->createIndex(null, Table::REVIEWS, 'submissionDate');
+        $this->createIndex(null, Table::REVIEWTYPES, 'name');
+        $this->createIndex(null, Table::REVIEWTYPES, 'handle');
+        $this->createIndex(null, Table::REVIEWTYPES, 'fieldLayoutId');
+    }
+
+    public function dropProjectConfig(): void
+    {
+        Craft::$app->projectConfig->remove('reviews');
     }
 
     private function insertDefaultData(): void

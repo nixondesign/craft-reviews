@@ -18,6 +18,8 @@ class Settings extends Model
 
     public ?string $submissionTimeFieldName = 'submission_time';
 
+    public bool $showUserReviewsTab = true;
+
     /**
      * @inheritdoc
      */

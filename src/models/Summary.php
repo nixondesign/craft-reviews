@@ -2,28 +2,51 @@
 
 namespace rynpsc\reviews\models;
 
+use Exception;
 use craft\base\Model;
 use yii\helpers\ArrayHelper;
 
 class Summary extends Model
 {
-    public $count;
+    /**
+     * @var int
+     */
+    public int $count = 0;
 
-    public $average;
+    /**
+     * @var int
+     */
+    public int $average = 0;
 
-    public $lowest;
+    /**
+     * @var int|null
+     */
+    public ?int $lowest = null;
 
-    public $highest;
+    /**
+     * @var int|null
+     */
+    public ?int $highest = null;
 
-    public $ratingCounts = [];
+    /**
+     * @var array
+     */
+    private array $ratingCounts = [];
 
-    public function getTotalRatings(int $rating = null)
+    /**
+     * Gets the number of ratings with the given value.
+     *
+     * @param int|null $rating
+     * @return int
+     * @throws Exception
+     */
+    public function getTotalRatings(int $rating = null): int
     {
         if ($rating === null) {
             return $this->count;
         }
 
-        return ArrayHelper::getValue($this->ratingCounts, $rating - 1);
+        return (int)ArrayHelper::getValue($this->ratingCounts, $rating - 1);
     }
 
     /**

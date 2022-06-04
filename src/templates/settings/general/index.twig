@@ -2,14 +2,14 @@
 
 {% import "_includes/forms" as forms %}
 
-{% set title = 'Review Types' %}
+{% set title = 'Review Types'|t('reviews') %}
 {% set selectedSidebarItem = 'general' %}
 {% set fullPageForm = true %}
 
 {% block content %}
     {{ actionInput('reviews/settings/save-settings') }}
 
-    <h2 class="first">Interface</h2>
+    <h2 class="first">{{ 'Interface'|t('reviews') }}</h2>
 
     {{ forms.checkboxField({
         label: 'Show pending review count badge'|t('reviews'),
@@ -31,7 +31,7 @@
 
     <hr>
 
-    <h2>Spam Protection</h2>
+    <h2>{{ 'Spam Protection'|t('reviews') }}</h2>
 
     {{ forms.checkboxField({
         label: 'Enable spam protection'|t('reviews'),
@@ -42,7 +42,10 @@
         toggle: '#spam-settings',
     }) }}
 
-    <div id="spam-settings" class="{{ not settings.enableSpamProtection ? 'hidden' }}">
+	{% tag 'div' with {
+		id: 'spam-settings',
+		class: (not settings.enableSpamProtection ? 'hidden'),
+	} %}
         {{ forms.textField({
             label: 'Minimum Submit Time'|t('reviews'),
             instructions: 'The duration in seconds since page load that must pass before a submitted review is considered valid.'|t('reviews'),
@@ -69,5 +72,5 @@
             value: settings.submissionTimeFieldName,
             errors: settings.getErrors('submissionTimeFieldName'),
         }) }}
-    </div>
+    {% endtag %}
 {% endblock %}
