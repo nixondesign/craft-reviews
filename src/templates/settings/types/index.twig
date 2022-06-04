@@ -29,7 +29,7 @@
     {% set tableData = tableData|merge([{
         id: type.id,
         title: type.name|t('site'),
-        url: url('reviews/settings/types/' ~ type.id),
+        url: type.getCpEditUrl(),
         name: type.name|t('reviews')|e,
         handle: type.handle,
 		allowGuestReviews: type.allowGuestReviews,

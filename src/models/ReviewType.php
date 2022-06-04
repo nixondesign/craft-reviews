@@ -5,6 +5,7 @@ namespace rynpsc\reviews\models;
 use Craft;
 use craft\base\Model;
 use craft\behaviors\FieldLayoutBehavior;
+use craft\helpers\UrlHelper;
 use craft\validators\HandleValidator;
 use craft\validators\UniqueValidator;
 use DateTime;
@@ -12,6 +13,7 @@ use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
 
 /**
+ * @property-read string $cpEditUrl
  * @property-read array $config
  */
 class ReviewType extends Model
@@ -101,6 +103,16 @@ class ReviewType extends Model
         }];
 
         return $rules;
+    }
+
+    /**
+     * Returns the edit URL in the control panel.
+     *
+     * @return string
+     */
+    public function getCpEditUrl(): string
+    {
+        return UrlHelper::cpUrl('reviews/settings/types/' . $this->id);
     }
 
     /**
