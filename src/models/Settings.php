@@ -6,18 +6,39 @@ use craft\base\Model;
 
 class Settings extends Model
 {
+    /**
+     * @var bool Show sidebar badge.
+     */
     public bool $showSidebarBadge = true;
 
+    /**
+     * @var bool Show rating element sources.
+     */
     public bool $showRatingElementSources = true;
 
-    public string $honeypotFieldName = 'user_name';
+    /**
+     * @var string The name of the honeypot field.
+     */
+    public string $honeypotFieldName = 'user-name';
 
+    /**
+     * @var bool Enable spam protection.
+     */
     public bool $enableSpamProtection = true;
 
+    /**
+     * @var int Minimum submit time.
+     */
     public int $minimumSubmitTime = 1;
 
-    public ?string $submissionTimeFieldName = 'submission_time';
+    /**
+     * @var string|null The name of the submission time field.
+     */
+    public ?string $submissionTimeFieldName = 'submission-time';
 
+    /**
+     * @var bool Show user reviews tab on User pages.
+     */
     public bool $showUserReviewsTab = true;
 
     /**

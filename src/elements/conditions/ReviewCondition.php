@@ -3,13 +3,11 @@
 namespace rynpsc\reviews\elements\conditions;
 
 use craft\elements\conditions\ElementCondition;
-use craft\errors\InvalidTypeException;
 
 class ReviewCondition extends ElementCondition
 {
     /**
      * @inerhitdoc
-     * @throws InvalidTypeException
      */
     protected function conditionRuleTypes(): array
     {

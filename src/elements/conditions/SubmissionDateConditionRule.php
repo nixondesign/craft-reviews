@@ -12,6 +12,9 @@ use rynpsc\reviews\elements\Review;
 
 class SubmissionDateConditionRule extends BaseDateRangeConditionRule implements ElementConditionRuleInterface
 {
+    /**
+     * @inheritdoc
+     */
     public function getLabel(): string
     {
         return Craft::t('reviews', 'Submission Date');

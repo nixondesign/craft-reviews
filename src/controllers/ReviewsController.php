@@ -25,6 +25,9 @@ class ReviewsController extends Controller
         return $this->renderTemplate('reviews/elements/_index.twig');
     }
 
+    /**
+     * Saves a Review for a site request.
+     */
     public function actionSaveReview(): ?Response
     {
         $this->requirePostRequest();

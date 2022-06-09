@@ -18,30 +18,69 @@ use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
  */
 class ReviewType extends Model
 {
+    /**
+     * @var int|null ID
+     */
     public ?int $id = null;
 
+    /**
+     * @var string|null Name
+     */
     public ?string $name = null;
 
+    /**
+     * @var string|null Handle
+     */
     public ?string $handle = null;
 
+    /**
+     * @var int|null Field layout ID
+     */
     public ?int $fieldLayoutId = null;
 
+    /**
+     * @var bool Allow non-logged in users to submit reviews.
+     */
     public bool $allowGuestReviews = true;
 
+    /**
+     * @var bool Require name for guest reviews.
+     */
     public bool $requireFullName = true;
 
+    /**
+     * @var string The status applied to new reviews.
+     */
     public string $defaultStatus = Review::STATUS_PENDING;
 
+    /**
+     * @var string|null UID
+     */
     public ?string $uid = null;
 
+    /**
+     * @var bool Has title field.
+     */
     public bool $hasTitleField = true;
 
+    /**
+     * @var string|null The format of automatically generated title.
+     */
     public ?string $titleFormat = null;
 
+    /**
+     * @var int The maximum rating reviews of this type are allowed to have.
+     */
     public int $maxRating = 5;
 
+    /**
+     * @var DateTime|null Date created
+     */
     public ?DateTime $dateCreated = null;
 
+    /**
+     * @var DateTime|null Date updated
+     */
     public ?DateTime $dateUpdated = null;
 
     /**

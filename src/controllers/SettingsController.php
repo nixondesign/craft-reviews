@@ -10,6 +10,11 @@ use yii\web\Response;
 
 class SettingsController extends Controller
 {
+    /**
+     * Renders the plugin settings template.
+     *
+     * @return Response
+     */
     public function actionEdit(): Response
     {
         $settings = Plugin::getInstance()->getSettings();
@@ -18,6 +23,8 @@ class SettingsController extends Controller
     }
 
     /**
+     * Saves the plugin settings.
+     *
      * @throws BadRequestHttpException
      */
     public function actionSaveSettings(): Response

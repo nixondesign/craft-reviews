@@ -7,6 +7,9 @@ use craft\web\assets\cp\CpAsset;
 
 class ReviewsAsset extends AssetBundle
 {
+    /**
+     * @inerhitdoc
+     */
     public function init(): void
     {
         $this->sourcePath = __DIR__;

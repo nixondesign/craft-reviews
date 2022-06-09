@@ -22,17 +22,64 @@ use yii\db\Exception;
 
 class ReviewQuery extends ElementQuery
 {
+    /**
+     * @var mixed The minimum Submission Date that resulting reviews can have.
+     */
     public mixed $after = null;
+
+    /**
+     * @var mixed The maximum Submission Date that resulting reviews can have.
+     */
     public mixed $before = null;
+
+    /**
+     * @var mixed The subject element ID(s) that the resulting reviews must belong to.
+     */
     public mixed $elementId = null;
-    public ?string $email = null;
+
+    /**
+     * @var mixed The email address of the author the resulting reviews must belong to.
+     */
+    public mixed $email = null;
+
+    /**
+     * @var mixed The Moderation Status(es) the resulting reviews must have.
+     */
     public mixed $moderationStatus = null;
+
+    /**
+     * @var mixed The rating the resulting reviews must have.
+     */
     public mixed $rating = null;
+
+    /**
+     * @var mixed The review body that resulting reviews must have.
+     */
     public mixed $review = null;
+
+    /**
+     * @var mixed The Submission Date that the resulting reviews must have.
+     */
     public mixed $submissionDate = null;
+
+    /**
+     * @var mixed The type of subject element the resulting reviews must have.
+     */
     public mixed $subjectElementType = null;
+
+    /**
+     * @var mixed The review type ID(s) that the resulting reviews must have.
+     */
     public mixed $typeId = null;
+
+    /**
+     * @var mixed The user ID(s) that the resulting reviews authors must have.
+     */
     public mixed $authorId = null;
+
+    /**
+     * @var mixed The user group ID(s) that the resulting reviews authors must be in.
+     */
     public mixed $authorGroupId = null;
 
     /**
@@ -55,18 +102,36 @@ class ReviewQuery extends ElementQuery
         'reviews_reviews.submissionDate' => SORT_DESC,
     ];
 
-    public function after($value): self
+    /**
+     * Narrows the query results to only reviews that were submitted on or after a certain date.
+     *
+     * @param mixed $value
+     * @return ReviewQuery
+     */
+    public function after(mixed $value): self
     {
         $this->after = $value;
         return $this;
     }
 
-    public function before($value): self
+    /**
+     * Narrows the query results to only reviews that were submitted before a certain date.
+     *
+     * @param mixed $value
+     * @return $this
+     */
+    public function before(mixed $value): self
     {
         $this->before = $value;
         return $this;
     }
 
+    /**
+     * Narrows the query based on the element being reviewed.
+     *
+     * @param $value
+     * @return $this
+     */
     public function element($value): self
     {
         $this->elementId = $this->parseModelHandle(
@@ -78,42 +143,84 @@ class ReviewQuery extends ElementQuery
         return $this;
     }
 
+    /**
+     * Narrows the query based on the ID of the element being reviewed.
+     *
+     * @param $value
+     * @return $this
+     */
     public function elementId($value): self
     {
         $this->elementId = $value;
         return $this;
     }
 
+    /**
+     * Narrows the query based on the type of element the review is for.
+     *
+     * @param $value
+     * @return $this
+     */
     public function subjectElementType($value): self
     {
         $this->subjectElementType = $value;
         return $this;
     }
 
-    public function email($value): self
+    /**
+     * Narrows the query based on the authors email.
+     *
+     * @param string $value
+     * @return $this
+     */
+    public function email(string $value): self
     {
         $this->email = $value;
         return $this;
     }
 
+    /**
+     * Narrows the query based on the moderation status.
+     *
+     * @param $value
+     * @return $this
+     */
     public function moderationStatus($value): self
     {
         $this->moderationStatus = $value;
         return $this;
     }
 
+    /**
+     * Narrows the query based on the rating.
+     *
+     * @param $value
+     * @return $this
+     */
     public function rating($value): self
     {
         $this->rating = $value;
         return $this;
     }
 
+    /**
+     * Narrows the query based on the submission date.
+     *
+     * @param $value
+     * @return $this
+     */
     public function submissionDate($value): self
     {
         $this->submissionDate = $value;
         return $this;
     }
 
+    /**
+     * Narrows the query based on the reviews review type.
+     *
+     * @param $value
+     * @return $this
+     */
     public function type($value): self
     {
         $this->typeId = $this->parseModelHandle(
@@ -125,24 +232,48 @@ class ReviewQuery extends ElementQuery
         return $this;
     }
 
+    /**
+     * Narrows the query results based on the Reviews’ review type, per the types’ IDs.
+     *
+     * @param $value
+     * @return $this
+     */
     public function typeId($value): self
     {
         $this->typeId = $value;
         return $this;
     }
 
+    /**
+     * Narrows the query based on the reviews author.
+     *
+     * @param $value
+     * @return $this
+     */
     public function user($value): self
     {
         $this->authorId = $this->parseModelHandle($value, User::class);
         return $this;
     }
 
+    /**
+     * Narrows the query based on the reviews author, per the ID.
+     *
+     * @param $value
+     * @return $this
+     */
     public function authorId($value): self
     {
         $this->authorId = $value;
         return $this;
     }
 
+    /**
+     * Narrows the query results based on the user group the reviews author belongs to.
+     *
+     * @param $value
+     * @return $this
+     */
     public function authorGroup($value): self
     {
         $this->authorGroupId = $this->parseModelHandle(
@@ -154,6 +285,10 @@ class ReviewQuery extends ElementQuery
         return $this;
     }
 
+    /**
+     * @param $value
+     * @return $this
+     */
     public function authorGroupId($value): self
     {
         $this->authorId = $value;

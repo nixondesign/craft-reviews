@@ -13,27 +13,42 @@ use rynpsc\reviews\elements\Review;
 
 class AuthorConditionRule extends BaseElementSelectConditionRule implements ElementConditionRuleInterface
 {
+    /**
+     * @inerhitdoc
+     */
     public function getLabel(): string
     {
         return Craft::t('reviews', 'Author');
     }
 
+    /**
+     * @inerhitdoc
+     */
     protected function elementType(): string
     {
         return User::class;
     }
 
+    /**
+     * @inerhitdoc
+     */
     public function getExclusiveQueryParams(): array
     {
         return ['authorId'];
     }
 
+    /**
+     * @inerhitdoc
+     */
     public function modifyQuery(ElementQueryInterface $query): void
     {
         /** @var ReviewQuery $query */
         $query->authorId($this->getElementId());
     }
 
+    /**
+     * @inerhitdoc
+     */
     public function matchElement(ElementInterface $element): bool
     {
         /** @var Review $element */

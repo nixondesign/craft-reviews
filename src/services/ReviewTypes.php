@@ -22,11 +22,16 @@ use rynpsc\reviews\models\ReviewType;
 use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
 use Throwable;
 
+/**
+ * @property-read array $allReviewTypes
+ * @property-read array $editableReviewTypes
+ * @property-read int $totalEditableReviewTypes
+ */
 class ReviewTypes extends Component
 {
     private ?MemoizableArray $types = null;
 
-    private function types()
+    private function types(): ?MemoizableArray
     {
         if (isset($this->types)) {
             return $this->types;
@@ -257,7 +262,7 @@ class ReviewTypes extends Component
         return $reviewType ?? null;
     }
 
-    private function createTypeQuery()
+    private function createTypeQuery(): Query
     {
         return (new Query())->select('*')->from(Table::REVIEWTYPES);
     }

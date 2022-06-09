@@ -9,22 +9,22 @@ use yii\helpers\ArrayHelper;
 class Summary extends Model
 {
     /**
-     * @var int
+     * @var int The number of reviews.
      */
     public int $count = 0;
 
     /**
-     * @var int
+     * @var int The average rating.
      */
     public int $average = 0;
 
     /**
-     * @var int|null
+     * @var int|null The lowest rating.
      */
     public ?int $lowest = null;
 
     /**
-     * @var int|null
+     * @var int|null The highest rating.
      */
     public ?int $highest = null;
 
