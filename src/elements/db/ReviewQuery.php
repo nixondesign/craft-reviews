@@ -35,7 +35,7 @@ class ReviewQuery extends ElementQuery
     /**
      * @var mixed The subject element ID(s) that the resulting reviews must belong to.
      */
-    public mixed $elementId = null;
+    public mixed $ownerId = null;
 
     /**
      * @var mixed The email address of the author the resulting reviews must belong to.
@@ -132,12 +132,11 @@ class ReviewQuery extends ElementQuery
      * @param $value
      * @return $this
      */
-    public function element($value): self
+    public function owner($value): self
     {
-        $this->elementId = $this->parseModelHandle(
+        $this->ownerId = $this->parseModelHandle(
             $value,
             Element::class,
-            CraftTable::ELEMENTS,
         );
 
         return $this;
@@ -149,9 +148,9 @@ class ReviewQuery extends ElementQuery
      * @param $value
      * @return $this
      */
-    public function elementId($value): self
+    public function ownerId($value): self
     {
-        $this->elementId = $value;
+        $this->ownerId = $value;
         return $this;
     }
 
@@ -348,7 +347,7 @@ class ReviewQuery extends ElementQuery
 
         $this->query->select([
             'reviews_reviews.submissionDate',
-            'reviews_reviews.elementId',
+            'reviews_reviews.ownerId',
             'reviews_reviews.id',
             'reviews_reviews.rating',
             'reviews_reviews.review',
@@ -358,8 +357,8 @@ class ReviewQuery extends ElementQuery
             'reviews_reviews.moderationStatus',
         ]);
 
-        if ($this->elementId) {
-            $this->subQuery->andWhere(Db::parseNumericParam('reviews_reviews.elementId', $this->elementId));
+        if ($this->ownerId) {
+            $this->subQuery->andWhere(Db::parseNumericParam('reviews_reviews.ownerId', $this->ownerId));
         }
 
         if ($this->email) {
@@ -384,7 +383,7 @@ class ReviewQuery extends ElementQuery
         }
 
         if ($this->subjectElementType) {
-            $this->subQuery->innerJoin(['e' => CraftTable::ELEMENTS], '[[e.id]] = [[reviews_reviews.elementId]]');
+            $this->subQuery->innerJoin(['e' => CraftTable::ELEMENTS], '[[e.id]] = [[reviews_reviews.ownerId]]');
             $this->subQuery->andWhere(Db::parseParam('e.type', $this->subjectElementType));
         }
 

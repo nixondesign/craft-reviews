@@ -50,7 +50,7 @@ class Review extends Element
     public const STATUS_REJECTED = 'rejected';
 
     public ?DateTime $submissionDate = null;
-    public ?int $elementId = null;
+    public ?int $ownerId = null;
     public ?int $rating = null;
     public ?int $typeId = null;
     public ?string $moderationStatus = null;
@@ -257,7 +257,7 @@ class Review extends Element
     {
         return [
             'author' => Craft::t('reviews', 'Author'),
-            'elementId' => Craft::t('reviews', 'Element'),
+            'ownerId' => Craft::t('reviews', 'Element'),
             'rating' => Craft::t('reviews', 'Rating'),
             'submissionDate' => Craft::t('reviews', 'Date'),
         ];
@@ -270,7 +270,7 @@ class Review extends Element
     {
         return [
             'rating',
-            'elementId',
+            'ownerId',
             'authorId',
             'submissionDate',
         ];
@@ -398,7 +398,7 @@ class Review extends Element
         } else {
             $record = new ReviewRecord();
             $record->id = (int)$this->id;
-            $record->elementId = $this->elementId;
+            $record->ownerId = $this->ownerId;
             $record->typeId = $this->typeId;
             $record->siteId ??= Craft::$app->getSites()->getCurrentSite()->id;
         }
@@ -601,7 +601,7 @@ class Review extends Element
     public function getElement(): ?ElementInterface
     {
         return Craft::$app->getElements()->getElementById(
-            $this->elementId,
+            $this->ownerId,
             null,
             $this->siteId,
             [
@@ -776,7 +776,7 @@ class Review extends Element
             ->drafts(null)
             ->draftOf(false)
             ->id(['not', $this->getCanonicalId()])
-            ->elementId($this->elementId);
+            ->ownerId($this->ownerId);
 
         /** @var Review|null $review */
         $review = $query->one();
@@ -810,7 +810,7 @@ class Review extends Element
         $rules[] = [['moderationStatus'], 'required'];
         $rules[] = [['moderationStatus'], 'in', 'range' => array_keys(self::moderationStatuses())];
 
-        $rules[] = [['elementId'], 'elementValidator'];
+        $rules[] = [['ownerId'], 'elementValidator'];
         $rules[] = [['email', 'authorId'], 'uniqueUserValidator', 'on' => $scenarios];
         $rules[] = [['authorId', 'typeId'], 'number', 'integerOnly' => true, 'on' => $scenarios];
 
@@ -888,7 +888,7 @@ class Review extends Element
                 return Craft::$app->getView()->renderTemplate('reviews/elements/table-attributes/rating', [
                     'review' => $this,
                 ]);
-            case 'elementId':
+            case 'ownerId':
                 if (!$element = $this->getElement()) {
                     return Craft::t('reviews', 'Deleted Element');
                 }

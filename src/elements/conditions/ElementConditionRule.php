@@ -52,7 +52,7 @@ class ElementConditionRule extends BaseElementSelectConditionRule implements Ele
         $elementId = $this->getElementId();
 
         if ($elementId !== null) {
-            $query->elementId($elementId);
+            $query->ownerId($elementId);
         }
     }
 
@@ -128,6 +128,6 @@ class ElementConditionRule extends BaseElementSelectConditionRule implements Ele
             return true;
         }
 
-        return $this->matchValue($element->elementId);
+        return $this->matchValue($element->ownerId);
     }
 }

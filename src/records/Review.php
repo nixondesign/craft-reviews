@@ -10,7 +10,7 @@ use yii\db\ActiveQueryInterface;
 
 /**
  * @property int $id ID
- * @property int $elementId Element ID
+ * @property int $ownerId Element ID
  * @property int|null $authorId Author ID
  * @property int $siteId Site ID
  * @property int $typeId Type ID

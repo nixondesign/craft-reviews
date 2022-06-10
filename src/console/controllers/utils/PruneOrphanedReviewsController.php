@@ -28,7 +28,7 @@ class PruneOrphanedReviewsController extends Controller
 
         $query = (new Query())
             ->from(['reviews' => Table::REVIEWS])
-            ->where(['not in', 'elementId', $elementIds]);
+            ->where(['not in', 'ownerId', $elementIds]);
 
         $results = $query->all();
 

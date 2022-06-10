@@ -48,7 +48,7 @@ class Install extends Migration
 
         $this->createTable(Table::REVIEWS, [
             'id' => $this->primaryKey(),
-            'elementId' => $this->integer(),
+            'ownerId' => $this->integer(),
             'siteId' => $this->integer(),
             'typeId' => $this->integer(),
             'authorId' => $this->integer(),
@@ -104,7 +104,7 @@ class Install extends Migration
         $this->createIndex(null, Table::REVIEWS, 'siteId');
         $this->createIndex(null, Table::REVIEWS, 'rating');
         $this->createIndex(null, Table::REVIEWS, 'authorId');
-        $this->createIndex(null, Table::REVIEWS, 'elementId');
+        $this->createIndex(null, Table::REVIEWS, 'ownerId');
         $this->createIndex(null, Table::REVIEWS, 'submissionDate');
         $this->createIndex(null, Table::REVIEWTYPES, 'name');
         $this->createIndex(null, Table::REVIEWTYPES, 'handle');

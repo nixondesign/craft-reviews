@@ -76,7 +76,7 @@ class ReviewsController extends Controller
             $review->typeId = $typeId;
             $review->siteId = $this->request->getBodyParam('siteId');
             $review->fieldLayoutId = $review->getType()->fieldLayoutId;
-            $review->elementId = $this->request->getRequiredBodyParam('elementId');
+            $review->ownerId = $this->request->getRequiredBodyParam('ownerId');
         }
 
         $user = Craft::$app->getUser()->getIdentity();
