@@ -2,6 +2,7 @@
 
 namespace rynpsc\reviews\elements\db;
 
+use Craft;
 use craft\base\Element;
 use craft\db\Query;
 use craft\db\Table as CraftTable;
@@ -18,6 +19,7 @@ use rynpsc\reviews\models\ReviewType;
 use rynpsc\reviews\models\Summary;
 use rynpsc\reviews\Plugin;
 use yii\base\InvalidConfigException;
+use yii\base\NotSupportedException;
 use yii\db\Exception;
 
 class ReviewQuery extends ElementQuery
@@ -134,7 +136,7 @@ class ReviewQuery extends ElementQuery
      */
     public function owner($value): self
     {
-        $this->ownerId = $this->parseModelHandle(
+        $this->ownerId = $this->normaliseModelOrHandleParam(
             $value,
             Element::class,
         );
@@ -222,7 +224,7 @@ class ReviewQuery extends ElementQuery
      */
     public function type($value): self
     {
-        $this->typeId = $this->parseModelHandle(
+        $this->typeId = $this->normaliseModelOrHandleParam(
             $value,
             ReviewType::class,
             Table::REVIEWTYPES,
@@ -251,7 +253,7 @@ class ReviewQuery extends ElementQuery
      */
     public function user($value): self
     {
-        $this->authorId = $this->parseModelHandle($value, User::class);
+        $this->authorId = $this->normaliseModelOrHandleParam($value, User::class);
         return $this;
     }
 
@@ -275,7 +277,7 @@ class ReviewQuery extends ElementQuery
      */
     public function authorGroup($value): self
     {
-        $this->authorGroupId = $this->parseModelHandle(
+        $this->authorGroupId = $this->normaliseModelOrHandleParam(
             $value,
             UserGroup::class,
             CraftTable::USERGROUPS,
@@ -343,6 +345,10 @@ class ReviewQuery extends ElementQuery
      */
     protected function beforePrepare(): bool
     {
+        if ($this->typeId === []) {
+            return false;
+        }
+
         $this->joinElementTable('reviews_reviews');
 
         $this->query->select([
@@ -437,19 +443,36 @@ class ReviewQuery extends ElementQuery
         };
     }
 
-    protected function parseModelHandle($value, string $model, string $table = null): array
+    /**
+     * Normalises a param that can be a mixture of one or more IDs, models
+     * or handles to an array of IDs.
+     *
+     * If the value is an instance of the model the value of models' id property
+     * will be returned if it exists. Strings are assumed to be "handles" and the
+     * "id" of respective row in the table will be returned. Numeric values are
+     * returned unaltered.
+     *
+     * If the original param value began with `and`, `or`, or `not`, that will be preserved.
+     *
+     * @param mixed $value
+     * @param string $model The className of the model to extract the IDs from.
+     * @param string|null $table The name of table to extract the IDs from.
+     * @return array
+     * @throws NotSupportedException
+     */
+    private function normaliseModelOrHandleParam(mixed $value, string $model, string $table = null): array
     {
         $ids = [];
         $handles = [];
 
-        $values = ArrayHelper::isTraversable($value) ? $value : [$value];
+        $values = is_array($value) ? $value : [$value];
 
-        if ($glue = Db::extractGlue($values)) {
-            array_unshift($ids, $glue);
-        }
+        $glue = Db::extractGlue($values);
+
+        $modelHasIdProperty = property_exists($model, 'id');
 
         foreach ($values as $v) {
-            if ($v instanceof $model) {
+            if ($v instanceof $model && $modelHasIdProperty) {
                 $ids[] = $v->id ?? null;
             } elseif (is_numeric($v)) {
                 $ids[] = $v;
@@ -458,14 +481,39 @@ class ReviewQuery extends ElementQuery
             }
         }
 
-        if ($table && count($handles)) {
-            $ids = ArrayHelper::merge($ids, (new Query())
-                ->select('id')
-                ->from($table)
-                ->where(Db::parseParam('handle', $handles))
-                ->column());
+        if ($table) {
+            $ids = ArrayHelper::merge($ids, $this->handlesToIds($handles, $table));
+        }
+
+        if ($glue !== null) {
+            array_unshift($ids, $glue);
         }
 
         return $ids;
+    }
+
+    /**
+     * Takes an array of handles and returns the matching IDs from the specified table.
+     *
+     * @param array $handles
+     * @param string $table
+     * @return array
+     * @throws NotSupportedException
+     */
+    private function handlesToIds(array $handles, string $table): array
+    {
+        if (count($handles) === 0) {
+            return [];
+        }
+
+        if (!Craft::$app->db->tableExists($table) || !Craft::$app->db->columnExists($table, 'handle')) {
+            return [];
+        }
+
+        return (new Query())
+            ->select('id')
+            ->from($table)
+            ->where(Db::parseParam('handle', $handles))
+            ->column();
     }
 }
