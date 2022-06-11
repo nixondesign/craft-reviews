@@ -100,6 +100,20 @@ class ReviewQuery extends ElementQuery
     /**
      * @inheritdoc
      */
+    public function __set($name, $value)
+    {
+        switch ($name) {
+            case 'type':
+                $this->type($value);
+                break;
+            default:
+                parent::__set($name, $value);
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     protected array $defaultOrderBy = [
         'reviews_reviews.submissionDate' => SORT_DESC,
     ];

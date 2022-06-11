@@ -4,6 +4,9 @@ namespace rynpsc\reviews;
 
 use Craft;
 use craft\base\Plugin as BasePlugin;
+use craft\console\Controller;
+use craft\console\controllers\ResaveController;
+use craft\events\DefineConsoleActionsEvent;
 use craft\events\DefineElementInnerHtmlEvent;
 use craft\events\DefineFieldLayoutFieldsEvent;
 use craft\events\RegisterUrlRulesEvent;
@@ -70,9 +73,15 @@ class Plugin extends BasePlugin
         $this->registerUserPermissions();
         $this->registerVariables();
 
-        if (Craft::$app->getRequest()->getIsCpRequest()) {
+        $request = Craft::$app->getRequest();
+
+        if ($request->getIsCpRequest()) {
             $this->registerCpRoutes();
             $this->defineFieldLayoutFields();
+        }
+
+        if ($request->getIsConsoleRequest()) {
+            $this->registerResaveController();
         }
     }
 
@@ -205,6 +214,33 @@ class Plugin extends BasePlugin
             ->onAdd(ProjectConfig::PATH_REVIEW_TYPES . '.{uid}', [$reviewTypesService, 'handleChangedReviewType'])
             ->onUpdate(ProjectConfig::PATH_REVIEW_TYPES . '.{uid}', [$reviewTypesService, 'handleChangedReviewType'])
             ->onRemove(ProjectConfig::PATH_REVIEW_TYPES . '.{uid}', [$reviewTypesService, 'handleDeletedReviewType']);
+    }
+
+    private function registerResaveController(): void
+    {
+        Event::on(
+            ResaveController::class,
+            Controller::EVENT_DEFINE_ACTIONS,
+            static function(DefineConsoleActionsEvent $event) {
+                $event->actions['reviews'] = [
+                    'options' => ['type'],
+                    'helpSummary' => 'Re-saves reviews.',
+                    'optionsHelp' => ['type' => 'The review type handle(s) of the reviews to resave.'],
+                    'action' => function(): int {
+                        $criteria = [];
+
+                        // @var ResaveController $controller
+                        $controller = Craft::$app->controller;
+
+                        if ($controller->type) {
+                            $criteria['type'] = explode(',', $controller->type);
+                        }
+
+                        return $controller->resaveElements(Review::class, $criteria);
+                    }
+                ];
+            }
+        );
     }
 
     private function registerTemplateHooks(): void
