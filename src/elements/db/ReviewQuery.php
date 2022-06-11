@@ -35,7 +35,7 @@ class ReviewQuery extends ElementQuery
     public mixed $before = null;
 
     /**
-     * @var mixed The subject element ID(s) that the resulting reviews must belong to.
+     * @var mixed The owner element ID(s) that the resulting reviews must belong to.
      */
     public mixed $ownerId = null;
 
@@ -65,9 +65,9 @@ class ReviewQuery extends ElementQuery
     public mixed $submissionDate = null;
 
     /**
-     * @var mixed The type of subject element the resulting reviews must have.
+     * @var mixed The type of the owner element that the resulting reviews must have.
      */
-    public mixed $subjectElementType = null;
+    public mixed $ownerType = null;
 
     /**
      * @var mixed The review type ID(s) that the resulting reviews must have.
@@ -176,9 +176,9 @@ class ReviewQuery extends ElementQuery
      * @param $value
      * @return $this
      */
-    public function subjectElementType($value): self
+    public function ownerType($value): self
     {
-        $this->subjectElementType = $value;
+        $this->ownerType = $value;
         return $this;
     }
 
@@ -402,9 +402,9 @@ class ReviewQuery extends ElementQuery
             }
         }
 
-        if ($this->subjectElementType) {
+        if ($this->ownerType) {
             $this->subQuery->innerJoin(['e' => CraftTable::ELEMENTS], '[[e.id]] = [[reviews_reviews.ownerId]]');
-            $this->subQuery->andWhere(Db::parseParam('e.type', $this->subjectElementType));
+            $this->subQuery->andWhere(Db::parseParam('e.type', $this->ownerType));
         }
 
         if ($this->rating) {

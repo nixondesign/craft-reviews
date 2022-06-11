@@ -11,14 +11,14 @@ use craft\elements\db\ElementQueryInterface;
 use rynpsc\reviews\elements\db\ReviewQuery;
 use rynpsc\reviews\elements\Review;
 
-class ElementTypeConditionRule extends BaseMultiSelectConditionRule implements ElementConditionRuleInterface
+class OwnerTypeConditionRule extends BaseMultiSelectConditionRule implements ElementConditionRuleInterface
 {
     /**
      * @inheritdoc
      */
     public function getLabel(): string
     {
-        return Craft::t('reviews', 'Subject Type');
+        return Craft::t('reviews', 'Owner Type');
     }
 
     /**
@@ -26,7 +26,7 @@ class ElementTypeConditionRule extends BaseMultiSelectConditionRule implements E
      */
     public function getExclusiveQueryParams(): array
     {
-        return ['subjectElementType'];
+        return ['ownerType'];
     }
 
     /**
@@ -55,7 +55,7 @@ class ElementTypeConditionRule extends BaseMultiSelectConditionRule implements E
     public function modifyQuery(ElementQueryInterface $query): void
     {
         /** @var ReviewQuery $query */
-        $query->subjectElementType($this->paramValue(fn(string $type) => $type));
+        $query->ownerType($this->paramValue(fn(string $type) => $type));
     }
 
     /**
@@ -64,10 +64,10 @@ class ElementTypeConditionRule extends BaseMultiSelectConditionRule implements E
     public function matchElement(ElementInterface $element): bool
     {
         /** @var Review $element */
-        if (($subjectElement = $element->getElement()) === null) {
+        if (($ownerElement = $element->getElement()) === null) {
             return false;
         }
 
-        return $this->matchValue($subjectElement::class);
+        return $this->matchValue($ownerElement::class);
     }
 }
