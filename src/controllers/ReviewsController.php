@@ -3,16 +3,22 @@
 namespace rynpsc\reviews\controllers;
 
 use Craft;
+use craft\errors\MissingComponentException;
 use craft\helpers\DateTimeHelper;
 use craft\web\Controller;
 use DateTime;
 use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\Plugin;
+use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
+/**
+ * @property-read bool $isSpam
+ * @property-read Review $reviewModel
+ */
 class ReviewsController extends Controller
 {
     /**
@@ -27,6 +33,12 @@ class ReviewsController extends Controller
 
     /**
      * Saves a Review for a site request.
+     *
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     * @throws InvalidConfigException
+     * @throws MissingComponentException
+     * @throws NotFoundHttpException
      */
     public function actionSaveReview(): ?Response
     {
@@ -60,7 +72,12 @@ class ReviewsController extends Controller
         return $this->redirectToPostedUrl($review);
     }
 
-    private function getReviewModel()
+    /**
+     * @throws BadRequestHttpException
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
+    private function getReviewModel(): Review
     {
         $typeId = $this->request->getBodyParam('typeId');
         $reviewId = $this->request->getBodyParam('reviewId');
@@ -97,6 +114,9 @@ class ReviewsController extends Controller
         return $review;
     }
 
+    /**
+     * @throws BadRequestHttpException
+     */
     private function getIsSpam(): bool
     {
         $settings = Plugin::getInstance()->getSettings();

@@ -7,12 +7,19 @@ use craft\web\Controller;
 use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\models\ReviewType;
 use rynpsc\reviews\Plugin;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class ReviewTypesController extends Controller
 {
+    /**
+     * Renders the review types control panel index page.
+     *
+     * @return Response
+     * @throws ForbiddenHttpException
+     */
     public function actionIndex(): Response
     {
         $this->requireAdmin();
@@ -23,6 +30,8 @@ class ReviewTypesController extends Controller
     }
 
     /**
+     * Renders an individual review types control panel page.
+     *
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
@@ -58,6 +67,13 @@ class ReviewTypesController extends Controller
         return $this->renderTemplate('reviews/settings/types/_edit', $variables);
     }
 
+    /**
+     * Saves a review type.
+     *
+     * @return Response|null
+     * @throws ForbiddenHttpException
+     * @throws BadRequestHttpException
+     */
     public function actionSaveType(): ?Response
     {
         $this->requireAdmin();
@@ -100,6 +116,12 @@ class ReviewTypesController extends Controller
         return $this->redirectToPostedUrl($reviewType);
     }
 
+    /**
+     * Deletes a review type.
+     *
+     * @return Response
+     * @throws BadRequestHttpException
+     */
     public function actionDeleteReviewType(): Response
     {
         $this->requirePostRequest();
