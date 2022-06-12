@@ -17,10 +17,7 @@ use rynpsc\reviews\db\Table;
 use rynpsc\reviews\elements\Review;
 use rynpsc\reviews\models\ReviewType;
 use rynpsc\reviews\models\Summary;
-use rynpsc\reviews\Plugin;
-use yii\base\InvalidConfigException;
 use yii\base\NotSupportedException;
-use yii\db\Exception;
 
 class ReviewQuery extends ElementQuery
 {
@@ -310,37 +307,27 @@ class ReviewQuery extends ElementQuery
         return $this;
     }
 
-    /**
-     * @throws InvalidConfigException|Exception
-     */
     public function summary($db = null): ?Summary
     {
-        $typesService = Plugin::getInstance()->getReviewTypes();
-
-        if ($this->typeId === null) {
-            throw new InvalidConfigException("Query is missing a valid 'type' or 'typeId' parameter.");
-        }
-
-        $type = $typesService->getTypeById($this->typeId);
-
-        if ($type === null) {
-            return null;
-        }
-
         $this->select([
             'count' => 'COUNT(*)',
-            'average' => 'AVG([[rating]])',
-            'lowest' => 'MIN([[rating]])',
-            'highest' => 'MAX([[rating]])',
+            'average' => 'AVG([[reviews_reviews.rating]])',
+            'lowest' => 'MIN([[reviews_reviews.rating]])',
+            'highest' => 'MAX([[reviews_reviews.rating]])',
+            'maxRating' => 'MAX([[reviewType.maxRating]])',
         ]);
 
-        for ($i = 1; $i <= $type->maxRating; $i++) {
+        $this->innerJoin(['reviewType' => Table::REVIEWTYPES], '[[reviewType.id]] = [[reviews_reviews.typeId]]');
+
+        $result = $this->createCommand($db)->queryOne();
+
+        for ($i = 1; $i <= $result['maxRating']; $i++) {
             $param = ':rating' . $i;
             $this->addParams([$param => $i]);
             $this->addSelect(['countRating' . $i => "COUNT(CASE WHEN [[rating]] = {$param} THEN 1 END)"]);
         }
 
-        $result = $this->createCommand($db)->queryOne();
+        $result = ArrayHelper::merge($result, $this->createCommand($db)->queryOne());
 
         $model = new Summary();
         $model->setAttributes($result);

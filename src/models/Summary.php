@@ -29,9 +29,14 @@ class Summary extends Model
     public ?int $highest = null;
 
     /**
+     * @var int The maximum possible rating.
+     */
+    public int $maxRating = 0;
+
+    /**
      * @var array
      */
-    private array $ratingCounts = [];
+    public array $ratingCounts = [];
 
     /**
      * Gets the number of ratings with the given value.
@@ -57,7 +62,7 @@ class Summary extends Model
         $rules = parent::defineRules();
 
         $rules[] = [['average'], 'number', 'integerOnly' => true];
-        $rules[] = [['count', 'lowest', 'highest' ], 'number', 'integerOnly' => true];
+        $rules[] = [[ 'count',  'lowest',  'highest',  'maxRating' ], 'number', 'integerOnly' => true];
 
         return $rules;
     }
