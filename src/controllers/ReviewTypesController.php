@@ -95,7 +95,7 @@ class ReviewTypesController extends Controller
             return null;
         }
 
-        $this->setSuccessFlash(Craft::t('reviews', 'Review type saved saved.'));
+        $this->setSuccessFlash(Craft::t('reviews', 'Review type saved.'));
 
         return $this->redirectToPostedUrl($reviewType);
     }
