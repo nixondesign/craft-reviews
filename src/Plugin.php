@@ -237,7 +237,7 @@ class Plugin extends BasePlugin
                         }
 
                         return $controller->resaveElements(Review::class, $criteria);
-                    }
+                    },
                 ];
             }
         );
