@@ -20,15 +20,6 @@
         errors: settings.getErrors('showSidebarBadge'),
     }) }}
 
-	{{ forms.checkboxField({
-		label: 'Show ratings in element sources'|t('reviews'),
-		instructions: 'Show individual ratings in the element sources sidebar.'|t('reviews'),
-		name: 'settings[showRatingElementSources]',
-		value: 1,
-		checked: settings.showRatingElementSources,
-		errors: settings.getErrors('showRatingElementSources'),
-	}) }}
-
     <hr>
 
     <h2>{{ 'Spam Protection'|t('reviews') }}</h2>

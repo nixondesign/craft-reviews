@@ -227,10 +227,6 @@ class Review extends Element
             ];
         }
 
-        if (!Plugin::getInstance()->getSettings()->showRatingElementSources) {
-            return $sources;
-        }
-
         $sources[] = ['heading' => Craft::t('reviews', 'Rating')];
 
         for ($i = 1; $i <= self::getHighestReviewTypeRating(); $i++) {

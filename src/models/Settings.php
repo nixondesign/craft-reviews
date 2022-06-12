@@ -12,11 +12,6 @@ class Settings extends Model
     public bool $showSidebarBadge = true;
 
     /**
-     * @var bool Show rating element sources.
-     */
-    public bool $showRatingElementSources = true;
-
-    /**
      * @var string The name of the honeypot field.
      */
     public string $honeypotFieldName = 'user-name';
