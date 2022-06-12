@@ -43,7 +43,7 @@
 		title: include('_elements/element', { element: review }),
         rating: ratingHtml,
 		date: review.submissionDate|date('short'),
-		element: include('_elements/element', { element: review.element }),
+		element: include('_elements/element', { element: review.getOwner() }),
     }) %}
 {% endfor %}
 
