@@ -27,7 +27,7 @@ class SettingsController extends Controller
      *
      * @throws BadRequestHttpException
      */
-    public function actionSaveSettings(): Response
+    public function actionSaveSettings(): ?Response
     {
         $this->requirePostRequest();
 
@@ -36,7 +36,11 @@ class SettingsController extends Controller
         if (!Craft::$app->getPlugins()->savePluginSettings(Plugin::getInstance(), $settings)) {
             $this->setFailFlash(Craft::t('reviews', 'Couldn’t save settings.'));
 
-            return $this->renderTemplate('reviews/settings/general', compact('settings'));
+            Craft::$app->getUrlManager()->setRouteParams([
+                'settings' => $settings,
+            ]);
+
+            return null;
         }
 
         $this->setSuccessFlash(Craft::t('reviews', 'Settings saved.'));
