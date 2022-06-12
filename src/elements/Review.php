@@ -253,7 +253,7 @@ class Review extends Element
     {
         return [
             'author' => Craft::t('reviews', 'Author'),
-            'ownerId' => Craft::t('reviews', 'Element'),
+            'ownerId' => Craft::t('reviews', 'Owner'),
             'rating' => Craft::t('reviews', 'Rating'),
             'submissionDate' => Craft::t('reviews', 'Date'),
         ];
