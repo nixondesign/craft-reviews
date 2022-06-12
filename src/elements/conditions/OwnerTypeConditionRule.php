@@ -18,7 +18,7 @@ class OwnerTypeConditionRule extends BaseMultiSelectConditionRule implements Ele
      */
     public function getLabel(): string
     {
-        return Craft::t('reviews', 'Owner Type');
+        return Craft::t('reviews', 'Owner Element Type');
     }
 
     /**

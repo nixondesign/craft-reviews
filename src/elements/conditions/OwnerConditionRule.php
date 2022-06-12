@@ -13,7 +13,7 @@ use craft\helpers\Cp;
 use craft\helpers\Html;
 use craft\helpers\UrlHelper;
 
-class ElementConditionRule extends BaseElementSelectConditionRule implements ElementConditionRuleInterface
+class OwnerConditionRule extends BaseElementSelectConditionRule implements ElementConditionRuleInterface
 {
     /**
      * @var string
@@ -25,7 +25,7 @@ class ElementConditionRule extends BaseElementSelectConditionRule implements Ele
      */
     public function getLabel(): string
     {
-        return Craft::t('reviews', 'Element');
+        return Craft::t('reviews', 'Owner Element');
     }
 
     /**

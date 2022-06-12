@@ -13,8 +13,8 @@ class ReviewCondition extends ElementCondition
     {
         return array_merge(parent::conditionRuleTypes(), [
             AuthorConditionRule::class,
-            ElementConditionRule::class,
             ModerationStatusConditionRule::class,
+            OwnerConditionRule::class,
             OwnerTypeConditionRule::class,
             RatingConditionRule::class,
             SubmissionDateConditionRule::class,
