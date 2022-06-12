@@ -4,6 +4,7 @@ namespace rynpsc\reviews\controllers;
 
 use Craft;
 use craft\web\Controller;
+use rynpsc\reviews\models\Settings;
 use rynpsc\reviews\Plugin;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
@@ -19,7 +20,15 @@ class SettingsController extends Controller
     {
         $settings = Plugin::getInstance()->getSettings();
 
-        return $this->renderTemplate('reviews/settings/general', compact('settings'));
+        $ratingDisplayOptions = [
+            ['label' => Craft::t('reviews', 'Star'), 'value' => Settings::RATING_DISPLAY_STAR],
+            ['label' => Craft::t('reviews', 'Numeric'), 'value' => Settings::RATING_DISPLAY_NUMERIC],
+        ];
+
+        return $this->renderTemplate('reviews/settings/general', [
+            'settings' => $settings,
+            'ratingDisplayOptions' => $ratingDisplayOptions,
+        ]);
     }
 
     /**

@@ -20,6 +20,15 @@
         errors: settings.getErrors('showSidebarBadge'),
     }) }}
 
+	{{ forms.selectField({
+		label: 'Rating Display'|t('reviews'),
+		instructions: 'How ratings should be displayed in element indexes.'|t('reviews'),
+		name: 'settings[elementIndexRatingDisplayType]',
+		options: ratingDisplayOptions,
+		value: settings.elementIndexRatingDisplayType,
+		errors: settings.getErrors('elementIndexRatingDisplayType'),
+	}) }}
+
     <hr>
 
     <h2>{{ 'Spam Protection'|t('reviews') }}</h2>
