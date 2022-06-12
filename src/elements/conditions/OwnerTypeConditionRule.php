@@ -64,7 +64,7 @@ class OwnerTypeConditionRule extends BaseMultiSelectConditionRule implements Ele
     public function matchElement(ElementInterface $element): bool
     {
         /** @var Review $element */
-        if (($ownerElement = $element->getElement()) === null) {
+        if (($ownerElement = $element->getOwner()) === null) {
             return false;
         }
 

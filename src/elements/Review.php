@@ -546,7 +546,7 @@ class Review extends Element
     {
         return [
             Craft::t('reviews', $this->getElementDisplayName()) => function() {
-                return $this->element;
+                return $this->getOwner();
             },
 
             Craft::t('reviews', 'Author') => function() {
@@ -594,7 +594,7 @@ class Review extends Element
         $response->selectedSubnavItem = 'reviews';
     }
 
-    public function getElement(): ?ElementInterface
+    public function getOwner(): ?ElementInterface
     {
         return Craft::$app->getElements()->getElementById(
             $this->ownerId,
@@ -608,7 +608,7 @@ class Review extends Element
 
     public function getElementDisplayName(): string
     {
-        $element = $this->getElement();
+        $element = $this->getOwner();
 
         if ($element === null) {
             return '';
@@ -885,7 +885,7 @@ class Review extends Element
                     'review' => $this,
                 ]);
             case 'ownerId':
-                if (!$element = $this->getElement()) {
+                if (!$element = $this->getOwner()) {
                     return Craft::t('reviews', 'Deleted Element');
                 }
 
