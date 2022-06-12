@@ -440,9 +440,10 @@ class ReviewQuery extends ElementQuery
 
         return match ($status) {
             Review::STATUS_LIVE => [
-                'elements.enabled' => true,
-                'reviews_reviews.moderationStatus' => Review::STATUS_APPROVED,
-                'reviews_reviews.submissionDate' => ['<=', $currentTimeDb],
+                'and',
+                ['=', 'elements.enabled', true],
+                ['=', 'reviews_reviews.moderationStatus', Review::STATUS_APPROVED],
+                ['<=', 'reviews_reviews.submissionDate', $currentTimeDb],
             ],
             Review::STATUS_APPROVED => [
                 'reviews_reviews.moderationStatus' => Review::STATUS_APPROVED,
