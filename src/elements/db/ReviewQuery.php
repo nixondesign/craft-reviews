@@ -430,7 +430,11 @@ class ReviewQuery extends ElementQuery
                 'and',
                 ['=', 'elements.enabled', true],
                 ['=', 'reviews_reviews.moderationStatus', Review::STATUS_APPROVED],
-                ['<=', 'reviews_reviews.submissionDate', $currentTimeDb],
+                [
+                    'or',
+                    ['reviews_reviews.submissionDate' => null],
+                    ['<=', 'reviews_reviews.submissionDate', $currentTimeDb],
+                ]
             ],
             Review::STATUS_APPROVED => [
                 'reviews_reviews.moderationStatus' => Review::STATUS_APPROVED,
