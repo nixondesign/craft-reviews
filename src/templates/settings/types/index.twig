@@ -28,7 +28,7 @@
 {% for type in reviewTypes %}
     {% set tableData = tableData|merge([{
         id: type.id,
-        title: type.name|t('site'),
+        title: type.name|t('reviews'),
         url: type.getCpEditUrl(),
         name: type.name|t('reviews')|e,
         handle: type.handle,
