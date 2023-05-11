@@ -9,9 +9,9 @@
 		"yii2"
 	],
 	"support": {
-		"docs": "https://github.com/rynpsc/craft-reviews/blob/main/README.md",
-		"issues": "https://github.com/rynpsc/craft-reviews/issues",
-		"source": "https://github.com/rynpsc/craft-reviews"
+		"docs": "https://github.com/nixondesign/craft-reviews/blob/main/README.md",
+		"issues": "https://github.com/nixondesign/craft-reviews/issues",
+		"source": "https://github.com/nixondesign/craft-reviews"
 	},
 	"config": {
 		"platform": {
