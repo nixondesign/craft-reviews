@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\fieldlayoutelements;
+namespace nixondesign\reviews\fieldlayoutelements;
 
 use Craft;
 use craft\base\ElementInterface;

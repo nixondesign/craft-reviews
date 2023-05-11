@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\elements\conditions;
+namespace nixondesign\reviews\elements\conditions;
 
 use Craft;
 use craft\base\BlockElementInterface;
@@ -8,8 +8,8 @@ use craft\base\conditions\BaseMultiSelectConditionRule;
 use craft\base\ElementInterface;
 use craft\elements\conditions\ElementConditionRuleInterface;
 use craft\elements\db\ElementQueryInterface;
-use rynpsc\reviews\elements\db\ReviewQuery;
-use rynpsc\reviews\elements\Review;
+use nixondesign\reviews\elements\db\ReviewQuery;
+use nixondesign\reviews\elements\Review;
 
 class OwnerTypeConditionRule extends BaseMultiSelectConditionRule implements ElementConditionRuleInterface
 {

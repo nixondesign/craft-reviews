@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\elements;
+namespace nixondesign\reviews\elements;
 
 use Craft;
 use craft\base\Element;
@@ -21,14 +21,14 @@ use craft\validators\DateTimeValidator;
 use craft\web\CpScreenResponseBehavior;
 use DateTime;
 use RuntimeException;
-use rynpsc\reviews\db\Table;
-use rynpsc\reviews\elements\conditions\ReviewCondition;
-use rynpsc\reviews\elements\db\ReviewQuery;
-use rynpsc\reviews\enums\Permissions;
-use rynpsc\reviews\models\ReviewType;
-use rynpsc\reviews\Plugin;
-use rynpsc\reviews\records\Review as ReviewRecord;
-use rynpsc\reviews\web\assets\ReviewsAsset;
+use nixondesign\reviews\db\Table;
+use nixondesign\reviews\elements\conditions\ReviewCondition;
+use nixondesign\reviews\elements\db\ReviewQuery;
+use nixondesign\reviews\enums\Permissions;
+use nixondesign\reviews\models\ReviewType;
+use nixondesign\reviews\Plugin;
+use nixondesign\reviews\records\Review as ReviewRecord;
+use nixondesign\reviews\web\assets\ReviewsAsset;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 

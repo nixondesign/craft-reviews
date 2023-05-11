@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\web\twig;
+namespace nixondesign\reviews\web\twig;
 
 use Craft;
 use craft\helpers\ArrayHelper;
@@ -8,9 +8,9 @@ use craft\helpers\Html;
 
 use craft\helpers\Template;
 use DateTime;
-use rynpsc\reviews\elements\db\ReviewQuery;
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\Plugin;
+use nixondesign\reviews\elements\db\ReviewQuery;
+use nixondesign\reviews\elements\Review;
+use nixondesign\reviews\Plugin;
 use Twig\Markup;
 use yii\base\Behavior;
 

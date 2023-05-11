@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\elements\conditions;
+namespace nixondesign\reviews\elements\conditions;
 
 use Craft;
 use craft\base\conditions\BaseMultiSelectConditionRule;
@@ -8,9 +8,9 @@ use craft\base\ElementInterface;
 use craft\elements\conditions\ElementConditionRuleInterface;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ArrayHelper;
-use rynpsc\reviews\elements\db\ReviewQuery;
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\Plugin;
+use nixondesign\reviews\elements\db\ReviewQuery;
+use nixondesign\reviews\elements\Review;
+use nixondesign\reviews\Plugin;
 
 class TypeConditionRule extends BaseMultiSelectConditionRule implements ElementConditionRuleInterface
 {

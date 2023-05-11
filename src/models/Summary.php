@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\models;
+namespace nixondesign\reviews\models;
 
 use craft\base\Model;
 use Exception;

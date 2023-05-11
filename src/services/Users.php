@@ -1,10 +1,10 @@
 <?php
 
-namespace rynpsc\reviews\services;
+namespace nixondesign\reviews\services;
 
 use Craft;
 use craft\base\Component;
-use rynpsc\reviews\elements\Review;
+use nixondesign\reviews\elements\Review;
 
 class Users extends Component
 {

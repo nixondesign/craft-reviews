@@ -1,9 +1,9 @@
 <?php
 
-namespace rynpsc\reviews\records;
+namespace nixondesign\reviews\records;
 
 use craft\db\ActiveRecord;
-use rynpsc\reviews\db\Table;
+use nixondesign\reviews\db\Table;
 
 /**
  * @property int $id ID

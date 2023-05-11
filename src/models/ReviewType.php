@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\models;
+namespace nixondesign\reviews\models;
 
 use Craft;
 use craft\base\Model;
@@ -9,8 +9,8 @@ use craft\helpers\UrlHelper;
 use craft\validators\HandleValidator;
 use craft\validators\UniqueValidator;
 use DateTime;
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
+use nixondesign\reviews\elements\Review;
+use nixondesign\reviews\records\ReviewType as ReviewTypeRecord;
 
 /**
  * @property-read string $cpEditUrl

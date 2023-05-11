@@ -1,16 +1,16 @@
 <?php
 
-namespace rynpsc\reviews\migrations;
+namespace nixondesign\reviews\migrations;
 
 use Craft;
 use craft\db\Migration;
 use craft\db\Table as CraftTable;
 use craft\helpers\Db;
 use craft\records\FieldLayout;
-use rynpsc\reviews\db\Table;
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\models\ReviewType;
-use rynpsc\reviews\Plugin;
+use nixondesign\reviews\db\Table;
+use nixondesign\reviews\elements\Review;
+use nixondesign\reviews\models\ReviewType;
+use nixondesign\reviews\Plugin;
 
 class Install extends Migration
 {

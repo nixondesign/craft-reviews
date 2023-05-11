@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\web\assets;
+namespace nixondesign\reviews\web\assets;
 
 use craft\web\AssetBundle;
 use craft\web\assets\cp\CpAsset;

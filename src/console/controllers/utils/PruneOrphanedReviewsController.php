@@ -1,13 +1,13 @@
 <?php
 
-namespace rynpsc\reviews\console\controllers\utils;
+namespace nixondesign\reviews\console\controllers\utils;
 
 use Craft;
 use craft\console\Controller;
 use craft\db\Query;
 use craft\helpers\Console;
-use rynpsc\reviews\db\Table;
-use rynpsc\reviews\elements\Review;
+use nixondesign\reviews\db\Table;
+use nixondesign\reviews\elements\Review;
 use yii\console\ExitCode;
 
 /**

@@ -1,40 +1,40 @@
-.rynpsc-reviews-star-input {
+.nixondesign-reviews-star-input {
 	display: flex;
 	align-items: center;
 	margin-top: 10px;
 }
 
-.rynpsc-reviews-star-input svg {
+.nixondesign-reviews-star-input svg {
 	width: 25px;
 	height: 25px;
 	margin: 0;
 }
 
-.rynpsc-reviews-star-input .clear {
+.nixondesign-reviews-star-input .clear {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	margin-right: 10px;
 }
 
-.rynpsc-reviews-star-input .clear svg {
+.nixondesign-reviews-star-input .clear svg {
 	width: 20px;
 	height: 20px;
 	margin-top: 2px;
 	fill: #596673 !important;
 }
 
-.rynpsc-reviews-star-input .clear:hover svg {
+.nixondesign-reviews-star-input .clear:hover svg {
 	fill: #e12d39 !important;
 }
 
-.rynpsc-reviews-star-input input {
+.nixondesign-reviews-star-input input {
     width: 25px;
     height: 25px;
     appearance: none;
 }
 
-.rynpsc-reviews-star-input label {
+.nixondesign-reviews-star-input label {
 	display: block;
 	width: 25px;
 	height: 25px;
@@ -42,22 +42,22 @@
 	margin-right: 5px;
 }
 
-.rynpsc-reviews-star-input input:checked ~ label svg {
+.nixondesign-reviews-star-input input:checked ~ label svg {
 	fill: #e7eef3;
 }
 
-.rynpsc-reviews-star-input input + label svg,
-.rynpsc-reviews-star-input input:checked + label svg {
+.nixondesign-reviews-star-input input + label svg,
+.nixondesign-reviews-star-input input:checked + label svg {
 	fill: #f7c948;
 	stroke: none;
 }
 
-.rynpsc-reviews-element-rating {
+.nixondesign-reviews-element-rating {
     margin-top: 7px;
     margin-bottom: 6px;
 }
 
-.rynpsc-reviews-element-review {
+.nixondesign-reviews-element-review {
     max-width: 560px;
     font-weight: 400;
     display: -webkit-box;
@@ -66,21 +66,21 @@
     overflow: hidden;
 }
 
-.rynpsc-reviews-stars {
+.nixondesign-reviews-stars {
 	gap: 1px;
     display: flex;
     white-space: nowrap;
 }
 
-.rynpsc-reviews-star-empty {
+.nixondesign-reviews-star-empty {
     fill: #e7eef3;
 }
 
-.rynpsc-reviews-star-filled {
+.nixondesign-reviews-star-filled {
     fill: #f7c948;
 }
 
-[data-type="rynpsc\\reviews\\elements\\Review"].element.small.hasstatus .status {
+[data-type="nixondesign\\reviews\\elements\\Review"].element.small.hasstatus .status {
 	top: 12px;
 	left: 2px;
 }

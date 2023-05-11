@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\enums;
+namespace nixondesign\reviews\enums;
 
 abstract class Permissions
 {

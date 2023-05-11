@@ -2,22 +2,22 @@
 {% set settings = craft.app.plugins.getPlugin('reviews').settings %}
 {% set displayType = settings.elementIndexRatingDisplayType %}
 
-{% if displayType == constant('rynpsc\\reviews\\models\\Settings::RATING_DISPLAY_STAR') %}
-	<div class="rynpsc-reviews-stars">
+{% if displayType == constant('nixondesign\\reviews\\models\\Settings::RATING_DISPLAY_STAR') %}
+	<div class="nixondesign-reviews-stars">
 		<span class="visually-hidden">{{ review.rating }}/{{ maxRating }}</span>
 
 		{% if review.rating %}
 			{% for i in 1..review.rating %}
-				{{ svg('@rynpsc/reviews/web/assets/star-filled.svg')|attr({
-					class: 'rynpsc-reviews-star-filled',
+				{{ svg('@nixondesign/reviews/web/assets/star-filled.svg')|attr({
+					class: 'nixondesign-reviews-star-filled',
 				}) }}
 			{% endfor %}
 		{% endif %}
 
 		{% if review.rating < maxRating %}
 			{% for i in 1..(maxRating - review.rating) %}
-				{{ svg('@rynpsc/reviews/web/assets/star-empty.svg')|attr({
-					class: 'rynpsc-reviews-star-empty',
+				{{ svg('@nixondesign/reviews/web/assets/star-empty.svg')|attr({
+					class: 'nixondesign-reviews-star-empty',
 				}) }}
 			{% endfor %}
 		{% endif %}

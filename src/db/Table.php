@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\db;
+namespace nixondesign\reviews\db;
 
 abstract class Table
 {

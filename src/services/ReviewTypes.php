@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\services;
+namespace nixondesign\reviews\services;
 
 use Craft;
 use craft\base\Component;
@@ -14,12 +14,12 @@ use craft\helpers\Queue;
 use craft\helpers\StringHelper;
 use craft\models\FieldLayout;
 use craft\queue\jobs\ResaveElements;
-use rynpsc\reviews\db\Table;
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\enums\Permissions;
-use rynpsc\reviews\enums\ProjectConfig;
-use rynpsc\reviews\models\ReviewType;
-use rynpsc\reviews\records\ReviewType as ReviewTypeRecord;
+use nixondesign\reviews\db\Table;
+use nixondesign\reviews\elements\Review;
+use nixondesign\reviews\enums\Permissions;
+use nixondesign\reviews\enums\ProjectConfig;
+use nixondesign\reviews\models\ReviewType;
+use nixondesign\reviews\records\ReviewType as ReviewTypeRecord;
 use Throwable;
 
 /**

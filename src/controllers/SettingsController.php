@@ -1,11 +1,11 @@
 <?php
 
-namespace rynpsc\reviews\controllers;
+namespace nixondesign\reviews\controllers;
 
 use Craft;
 use craft\web\Controller;
-use rynpsc\reviews\models\Settings;
-use rynpsc\reviews\Plugin;
+use nixondesign\reviews\models\Settings;
+use nixondesign\reviews\Plugin;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
 

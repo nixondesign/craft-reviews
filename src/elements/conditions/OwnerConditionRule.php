@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews\elements\conditions;
+namespace nixondesign\reviews\elements\conditions;
 
 use Craft;
 use craft\base\BlockElementInterface;

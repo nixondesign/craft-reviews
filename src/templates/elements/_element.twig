@@ -3,14 +3,14 @@
 {% set statusColor = statusDef.color ?? status %}
 {% set statusLabel = statusDef.label ?? statusDef ?? status|ucfirst %}
 
-<div class="rynpsc-reviews-element">
-	<div class="rynpsc-reviews-element-status">
+<div class="nixondesign-reviews-element">
+	<div class="nixondesign-reviews-element-status">
 		<span class="status {{ statusColor }}"></span>
 	</div>
 
 	<a href="{{ review.cpEditUrl }}">{{ review.title }}</a>
 
-	<div class="rynpsc-reviews-element-review">
+	<div class="nixondesign-reviews-element-review">
 		<p>{{ review.review }}</p>
 	</div>
 </div>

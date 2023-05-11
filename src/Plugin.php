@@ -1,6 +1,6 @@
 <?php
 
-namespace rynpsc\reviews;
+namespace nixondesign\reviews;
 
 use Craft;
 use craft\base\Plugin as BasePlugin;
@@ -16,17 +16,17 @@ use craft\models\FieldLayout;
 use craft\services\UserPermissions;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\enums\Permissions;
-use rynpsc\reviews\enums\ProjectConfig;
-use rynpsc\reviews\fieldlayoutelements\RatingField;
-use rynpsc\reviews\fieldlayoutelements\ReviewField;
-use rynpsc\reviews\fieldlayoutelements\ReviewTitleField;
-use rynpsc\reviews\models\Settings;
-use rynpsc\reviews\services\Reviews;
-use rynpsc\reviews\services\ReviewTypes;
-use rynpsc\reviews\services\Users;
-use rynpsc\reviews\web\twig\Variable;
+use nixondesign\reviews\elements\Review;
+use nixondesign\reviews\enums\Permissions;
+use nixondesign\reviews\enums\ProjectConfig;
+use nixondesign\reviews\fieldlayoutelements\RatingField;
+use nixondesign\reviews\fieldlayoutelements\ReviewField;
+use nixondesign\reviews\fieldlayoutelements\ReviewTitleField;
+use nixondesign\reviews\models\Settings;
+use nixondesign\reviews\services\Reviews;
+use nixondesign\reviews\services\ReviewTypes;
+use nixondesign\reviews\services\Users;
+use nixondesign\reviews\web\twig\Variable;
 use yii\base\Event;
 
 /**

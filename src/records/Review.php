@@ -1,11 +1,11 @@
 <?php
 
-namespace rynpsc\reviews\records;
+namespace nixondesign\reviews\records;
 
 use craft\db\ActiveRecord;
 use craft\elements\User;
 use DateTime;
-use rynpsc\reviews\db\Table;
+use nixondesign\reviews\db\Table;
 use yii\db\ActiveQueryInterface;
 
 /**

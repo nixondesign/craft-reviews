@@ -1,14 +1,14 @@
 <?php
 
-namespace rynpsc\reviews\controllers;
+namespace nixondesign\reviews\controllers;
 
 use Craft;
 use craft\errors\MissingComponentException;
 use craft\helpers\DateTimeHelper;
 use craft\web\Controller;
 use DateTime;
-use rynpsc\reviews\elements\Review;
-use rynpsc\reviews\Plugin;
+use nixondesign\reviews\elements\Review;
+use nixondesign\reviews\Plugin;
 use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;

@@ -1,14 +1,14 @@
 <?php
 
-namespace rynpsc\reviews\elements\conditions;
+namespace nixondesign\reviews\elements\conditions;
 
 use Craft;
 use craft\base\conditions\BaseDateRangeConditionRule;
 use craft\base\ElementInterface;
 use craft\elements\conditions\ElementConditionRuleInterface;
 use craft\elements\db\ElementQueryInterface;
-use rynpsc\reviews\elements\db\ReviewQuery;
-use rynpsc\reviews\elements\Review;
+use nixondesign\reviews\elements\db\ReviewQuery;
+use nixondesign\reviews\elements\Review;
 
 class SubmissionDateConditionRule extends BaseDateRangeConditionRule implements ElementConditionRuleInterface
 {
