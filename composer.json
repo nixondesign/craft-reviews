@@ -1,5 +1,5 @@
 {
-	"name": "rynpsc/craft-reviews",
+	"name": "nixondesign/craft-reviews",
 	"description": "Allow users to leave reviews on Products, Entries and other element types.",
 	"type": "craft-plugin",
 	"license": "proprietary",
