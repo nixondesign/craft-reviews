@@ -47,6 +47,11 @@ class Plugin extends BasePlugin
     public bool $hasCpSettings = true;
 
     /**
+     * @inheritdoc
+     */
+    public string $schemaVersion = '2.0.0';
+
+    /**
      * @inerhitdoc
      */
     public static function config(): array
