@@ -29,7 +29,7 @@ class m230511_150323_change_namespace extends Migration
         $this->update(
             CraftTable::ELEMENTS,
             ['type' => 'nixondesign\reviews\elements\Review'],
-            ['type' => 'rynpsc\reviews\elements\Review'],
+            'type = rynpsc\reviews\elements\Review',
         );
 
         $this->renameFieldLayoutElements(
